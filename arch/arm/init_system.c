@@ -1,13 +1,16 @@
 #include "s3c24xx.h"
 #include "system.h"
 #include "config.h"
+#include "proc.h"
+#include "common.h"
+#include "interrupt.h"
 #include "s3c24xx_irqs.h"
 
 extern void enable_irq(void);
 extern void disable_irq(void);
 
 /*
- * ¹Ø±ÕWATCHDOG£¬·ñÔòCPU»á²»¶ÏÖØÆô
+ * ??WATCHDOG,??CPU?????
  */
 void disable_watch_dog(void)
 {
@@ -20,7 +23,7 @@ void init_memory(void)
     int i = 0;
     volatile unsigned long *p = (volatile unsigned long *)MEM_CTL_BASE;
 
-    /* SDRAM 13¸ö¼Ä´æÆ÷µÄÖµ */
+    /* SDRAM 13?????? */
     unsigned long  const    mem_cfg_val[] = {
 					      0x22000000,     //BWSCON
 					      0x00000700,     //BANKCON0
@@ -44,14 +47,14 @@ void init_memory(void)
 
 
 /*
- * ÉèÖÃÒ³±í
+ * ????
  */
 
 extern unsigned int MMU_TLB_BASE;
 extern unsigned int SYSTEM_TOTAL_MEMORY_START;
 
  #define VECTOR_BASE SYSTEM_TOTAL_MEMORY_START
-//Ó³Éä1MµØÖ·¿Õ¼ä
+//??1M????
 void __set_l1_section_descriptor(unsigned long virtuladdr, unsigned long physicaladdr, unsigned int attributes)
 {
     volatile unsigned int *mmu_tlb_base = (unsigned int*)MMU_TLB_BASE;
@@ -59,7 +62,7 @@ void __set_l1_section_descriptor(unsigned long virtuladdr, unsigned long physica
 	*(mmu_tlb_base + (virtuladdr >> 20)) = (physicaladdr & 0xFFF00000) | attributes;
 }
 
-//Ó³ÉäÁ¬Ðøn MµØÖ·¿Õ¼ä
+//????n M????
 void set_l1_parallel_descriptor(unsigned long viraddr_start, unsigned long viraddr_end, unsigned long phyaddr_start, unsigned int attributes)
 {
 	int nSec, i;
@@ -79,7 +82,7 @@ void create_page_table(void)
     volatile unsigned long *mmu_tlb_base = (volatile unsigned long *)MMU_TLB_BASE;
 
     /*
-     * ½«0¡«1MµÄÐéÄâµØÖ·Ó³Éäµ½0x30000000
+     * ?0~1M????????0x30000000
      */
     virtuladdr = 0;
     physicaladdr = VECTOR_BASE;
@@ -103,7 +106,7 @@ void create_page_table(void)
     *(mmu_tlb_base + (virtuladdr >> 20)) = (physicaladdr & 0xFFF00000) | \
                                             MMU_SECDESC;
     /*
-     * 0x56000000ÊÇGPIO¼Ä´æÆ÷µÄÆðÊ¼ÎïÀíµØÖ·£¬
+     * 0x56000000?GPIO??????????,
      */
     virtuladdr = 0x56000000;
     physicaladdr = 0x56000000;
@@ -134,176 +137,111 @@ void create_page_table(void)
 }
 
 /*
- * Æô¶¯MMU
+ * ??MMU
  */
 
 void start_mmu(void)
 {
-	int r0, r4;
     unsigned long ttb = MMU_TLB_BASE;
 
-	__asm
-	{
-		mov    r0,  0
-		mcr    p15, 0, r0, c7, c7,  0   /* Ê¹ÎÞÐ§ICachesºÍDCaches */
+__asm__(
 
-		mcr    p15, 0, r0, c7, c10, 4   /* drain write buffer on v4 */
-		mcr    p15, 0, r0, c8, c7,  0    /* Ê¹ÎÞÐ§Ö¸Áî¡¢Êý¾ÝTLB */
-
-		mov    r4, ttb                  /* r4 = Ò³±í»ùÖ· */
-		mcr    p15, 0, r4, c2, c0, 0    /* ÉèÖÃÒ³±í»ùÖ·¼Ä´æÆ÷ */
-
-		mvn    r0, 0
-		mcr    p15, 0, r0, c3, c0, 0    /* Óò·ÃÎÊ¿ØÖÆ¼Ä´æÆ÷ÉèÎª0xFFFFFFFF£¬
-					                         * ²»½øÐÐÈ¨ÏÞ¼ì²é*/
+        "mov    r0, #0\n"
+        "mcr    p15, 0, r0, c7, c7, 0\n" 
+                                         		
+        "mcr    p15, 0, r0, c7, c10, 4\n"	   /* ???ICaches?DCaches */
+        "mcr    p15, 0, r0, c8, c7, 0\n" 
+                                         	   /* drain write buffer on v4 */
+        "mov    r4, %0\n"                	    /* ????????TLB */
+        "mcr    p15, 0, r4, c2, c0, 0\n" 
+                                         	   /* r4 = ???? */
+        "mvn    r0, #0\n"                	   /* ????????? */
+        "mcr    p15, 0, r0, c3, c0, 0\n"       /* ??????????0xFFFFFFFF,
+					                           * ???????*/
 		/*
-		* ¶ÔÓÚ¿ØÖÆ¼Ä´æÆ÷£¬ÏÈ¶Á³öÆäÖµ£¬ÔÚÕâ»ù´¡ÉÏÐÞ¸Ä¸ÐÐËÈ¤µÄÎ»£¬
-		* È»ºóÔÙÐ´Èë
+		* ???????,?????,????????????,
+		* ?????
 		*/
-		mrc    p15, 0, r0, c1, c0, 0    /* ¶Á³ö¿ØÖÆ¼Ä´æÆ÷µÄÖµ */
+		"mrc    p15, 0, r0, c1, c0, 0\n"       /* ????????? */
 
-		/* ¿ØÖÆ¼Ä´æÆ÷µÄµÍ16Î»º¬ÒåÎª£º.RVI ..RS B... .CAM
-		* R : ±íÊ¾»»³öCacheÖÐµÄÌõÄ¿Ê±Ê¹ÓÃµÄËã·¨£¬
-		*     0 = Random replacement£»1 = Round robin replacement
-		* V : ±íÊ¾Òì³£ÏòÁ¿±íËùÔÚµÄÎ»ÖÃ£¬
-		*     0 = Low addresses = 0x00000000£»1 = High addresses = 0xFFFF0000
-		* I : 0 = ¹Ø±ÕICaches£»1 = ¿ªÆôICaches
-		* R¡¢S : ÓÃÀ´ÓëÒ³±íÖÐµÄÃèÊö·ûÒ»ÆðÈ·¶¨ÄÚ´æµÄ·ÃÎÊÈ¨ÏÞ
-		* B : 0 = CPUÎªÐ¡×Ö½ÚÐò£»1 = CPUÎª´ó×Ö½ÚÐò
-		* C : 0 = ¹Ø±ÕDCaches£»1 = ¿ªÆôDCaches
-		* A : 0 = Êý¾Ý·ÃÎÊÊ±²»½øÐÐµØÖ·¶ÔÆë¼ì²é£»1 = Êý¾Ý·ÃÎÊÊ±½øÐÐµØÖ·¶ÔÆë¼ì²é
-		* M : 0 = ¹Ø±ÕMMU£»1 = ¿ªÆôMMU
+		/* ???????16????:.RVI ..RS B... .CAM
+		* R : ????Cache??????????,
+		*     0 = Random replacement;1 = Round robin replacement
+		* V : ????????????,
+		*     0 = Low addresses = 0x00000000;1 = High addresses = 0xFFFF0000
+		* I : 0 = ??ICaches;1 = ??ICaches
+		* R?S : ?????????????????????
+		* B : 0 = CPU?????;1 = CPU?????
+		* C : 0 = ??DCaches;1 = ??DCaches
+		* A : 0 = ??????????????;1 = ?????????????
+		* M : 0 = ??MMU;1 = ??MMU
 		*/
-
-		/*
-		* ÏÈÇå³ý²»ÐèÒªµÄÎ»£¬ÍùÏÂÈôÐèÒªÔòÖØÐÂÉèÖÃËüÃÇ
-		*/
-		                        /* .RVI ..RS B... .CAM */
-		bic    r0, r0, #0x3000          /* ..11 .... .... .... Çå³ýV¡¢IÎ» */
-		bic    r0, r0, #0x0300         /* .... ..11 .... .... Çå³ýR¡¢SÎ» */
-		bic    r0, r0, #0x0087          /* .... .... 1... .111 Çå³ýB/C/A/M */
 
 		/*
-		* ÉèÖÃÐèÒªµÄÎ»
+		* ????????,????????????
 		*/
-		orr    r0, r0, #0x0002          /* .... .... .... ..1. ¿ªÆô¶ÔÆë¼ì²é */
-		orr    r0, r0, #0x0004         /* .... .... .... .1.. ¿ªÆôDCaches */
-		orr    r0, r0, #0x1000         /* ...1 .... .... .... ¿ªÆôICaches */
-		orr    r0, r0, #0x0001         /* .... .... .... ...1 Ê¹ÄÜMMU */
+		                              /* .RVI ..RS B... .CAM */
+		"bic    r0, r0, #0x3000\n"    /* ..11 .... .... .... ??V?I? */
+		"bic    r0, r0, #0x0300\n"    /* .... ..11 .... .... ??R?S? */
+		"bic    r0, r0, #0x0087\n"    /* .... .... 1... .111 ??B/C/A/M */
 
-		mcr    p15, 0, r0, c1, c0, 0    /* ½«ÐÞ¸ÄµÄÖµÐ´Èë¿ØÖÆ¼Ä´æÆ÷ */		
-	}
+		/*
+		* ??????
+		*/
+		"orr    r0, r0, #0x0002\n"   /* .... .... .... ..1. ?????? */
+		"orr    r0, r0, #0x0004\n"   /* .... .... .... .1.. ??DCaches */
+		"orr    r0, r0, #0x1000\n"   /* ...1 .... .... .... ??ICaches */
+		"orr    r0, r0, #0x0001\n"   /* .... .... .... ...1 ??MMU */
+
+        "mcr    p15, 0, r0, c1, c0, 0\n" /* ???????????? */		
+        : 
+        : "r" (ttb) 
+        : "r0"
+        );
 }
-
-
-void MMU_SetMTT(int vaddrStart, int vaddrEnd, int paddrStart, int attr)
-{
-    volatile unsigned int *pTT;
-    volatile int i, nSec;
-
-    pTT = (unsigned int *)MMU_TLB_BASE + (vaddrStart >> 20);
-    nSec = (vaddrEnd >> 20) - (vaddrStart >> 20);
-    for (i = 0; i <= nSec; i++)
-        *pTT++ = attr | (((paddrStart >> 20) + i) << 20);
-}
-
-void MMU_Init(void)
-{
-	int i, j;
-	//========================== IMPORTANT NOTE =========================
-	//The current stack and code area can't be re-mapped in this routine.
-	//If you want memory map mapped freely, your own sophiscated MMU
-	//initialization code is needed.
-	//===================================================================
-
-	MMU_DisableDCache();
-	MMU_DisableICache();
-
-	//If write-back is used,the DCache should be cleared.
-	for(i=0;i<64;i++)
-		for(j=0;j<8;j++)
-			MMU_CleanInvalidateDCacheIndex((i<<26)|(j<<5));
-	MMU_InvalidateICache();
-    
-	#if 0
-	//To complete MMU_Init() fast, Icache may be turned on here.
-	MMU_EnableICache(); 
-	#endif
-    
-	MMU_DisableMMU();
-	MMU_InvalidateTLB();
-
-	//MMU_SetMTT(int vaddrStart,int vaddrEnd,int paddrStart,int attr)
-	//MMU_SetMTT(0x00000000,0x07f00000,0x00000000,RW_CNB);  //bank0
-	MMU_SetMTT(0x00000000,0x03f00000,0x30000000,RW_CB);  //bank0
-	MMU_SetMTT(0x04000000,0x07f00000,0,RW_NCNB);  			//bank0
-	MMU_SetMTT(0x08000000,0x0ff00000,0x08000000,RW_CNB);  //bank1
-	MMU_SetMTT(0x10000000,0x17f00000,0x10000000,RW_NCNB); //bank2
-	MMU_SetMTT(0x18000000,0x1ff00000,0x18000000,RW_NCNB); //bank3
-	//MMU_SetMTT(0x20000000,0x27f00000,0x20000000,RW_CB); //bank4
-	MMU_SetMTT(0x20000000,0x27f00000,0x20000000,RW_NCNB); //bank4 for DM9000
-	MMU_SetMTT(0x28000000,0x2ff00000,0x28000000,RW_NCNB); //bank5
-	//30f00000->30100000, 31000000->30200000
-	MMU_SetMTT(0x30000000,0x33f00000,0x30000000,RW_CB);	  //bank6-1
-    
-	MMU_SetMTT(0x40000000,0x47f00000,0x40000000,RW_NCNB); //SFR
-	MMU_SetMTT(0x48000000,0x5af00000,0x48000000,RW_NCNB); //SFR
-	MMU_SetMTT(0x5b000000,0x5b000000,0x5b000000,RW_NCNB); //SFR
-	MMU_SetMTT(0x5b100000,0xfff00000,0x5b100000,RW_FAULT);//not used
-
-    
-	MMU_SetTTBase(MMU_TLB_BASE);
-	MMU_SetDomain(0x55555550|DOMAIN1_ATTR|DOMAIN0_ATTR); 
-	//DOMAIN1: no_access, DOMAIN0,2~15=client(AP is checked)
-	MMU_SetProcessId(0x0);
-	MMU_EnableAlignFault();
-    	
-	MMU_EnableMMU();
-	MMU_EnableICache();
-	MMU_EnableDCache(); //DCache should be turned on after MMU is turned on.
-}    
 
 /*
- * ¶ÔÓÚMPLLCON¼Ä´æÆ÷£¬[19:12]ÎªMDIV£¬[9:4]ÎªPDIV£¬[1:0]ÎªSDIV
- * ÓÐÈçÏÂ¼ÆËã¹«Ê½£º
+ * ??MPLLCON???,[19:12]?MDIV,[9:4]?PDIV,[1:0]?SDIV
+ * ???????:
  *  S3C2410: MPLL(FCLK) = (m * Fin)/(p * 2^s)
  *  S3C2440: MPLL(FCLK) = (2 * m * Fin)/(p * 2^s)
- *  ÆäÖÐ: m = MDIV + 8, p = PDIV + 2, s = SDIV
- * ¶ÔÓÚ±¾¿ª·¢°å£¬Fin = 12MHz
- * ÉèÖÃCLKDIVN£¬Áî·ÖÆµ±ÈÎª£ºFCLK:HCLK:PCLK=1:2:4£¬
+ *  ??: m = MDIV + 8, p = PDIV + 2, s = SDIV
+ * ??????,Fin = 12MHz
+ * ??CLKDIVN,?????:FCLK:HCLK:PCLK=1:2:4,
  * FCLK=200MHz,HCLK=100MHz,PCLK=50MHz
  */
 void init_clock(void)
 {
-	int r1;
-    // LOCKTIME = 0x00ffffff;   // Ê¹ÓÃÄ¬ÈÏÖµ¼´¿É
+    // LOCKTIME = 0x00ffffff;   // ???????
     CLKDIVN  = 0x05;            // FCLK:HCLK:PCLK=1:2:4, HDIVN=1,PDIVN=1
+    
+    /* ??HDIVN?0,CPU????????“fast bus mode”??“asynchronous bus mode” */
+__asm__(
+    "mrc    p15, 0, r1, c1, c0, 0\n"        /* ??????? */
+    "orr    r1, r1, #0xc0000000\n"          /* ???“asynchronous bus mode” */
+    "mcr    p15, 0, r1, c1, c0, 0\n"        /* ??????? */
+    :
+    :
+    :"r1"
+    );
 
-    /* Èç¹ûHDIVN·Ç0£¬CPUµÄ×ÜÏßÄ£Ê½Ó¦¸Ã´Ó¡°fast bus mode¡±±äÎª¡°asynchronous bus mode¡± */
-	__asm
-	{
-		mrc    p15, 0, r1, c1, c0, 0        /* ¶Á³ö¿ØÖÆ¼Ä´æÆ÷ */
-	    orr    r1, r1, #0xc0000000          /* ÉèÖÃÎª¡°asynchronous bus mode¡± */
-	    mcr    p15, 0, r1, c1, c0, 0        /* Ð´Èë¿ØÖÆ¼Ä´æÆ÷ */
-	}
-
-    /* ÅÐ¶ÏÊÇS3C2410»¹ÊÇS3C2440 */
+    /* ???S3C2410??S3C2440 */
     if ((GSTATUS1 == 0x32410000) || (GSTATUS1 == 0x32410002))
     {
-        MPLLCON = S3C2410_MPLL_200MHZ;  /* ÏÖÔÚ£¬FCLK=200MHz,HCLK=100MHz,PCLK=50MHz */
+        MPLLCON = S3C2410_MPLL_200MHZ;  /* ??,FCLK=200MHz,HCLK=100MHz,PCLK=50MHz */
     }
     else
     {
-        MPLLCON = S3C2440_MPLL_200MHZ;  /* ÏÖÔÚ£¬FCLK=200MHz,HCLK=100MHz,PCLK=50MHz */
+        MPLLCON = S3C2440_MPLL_200MHZ;  /* ??,FCLK=200MHz,HCLK=100MHz,PCLK=50MHz */
     }
 }
 
 void s3c24xx_timer4_irq_handler(void *prv)
 {
-    OS_Clock_Tick();
+    OS_Clock_Tick(NULL);
 }
 
-int timer_init(void)
+int s3c24xx_timer_init(void)
 {
 	TCFG0 |= (100 << 8);
     TCFG1 |= (2 << 16);
@@ -326,13 +264,11 @@ int init_system(void)
     disable_watch_dog();
   
     init_clock();
-#if 0
     create_page_table();
     start_mmu();
-#else
-    MMU_Init();
-#endif
-	//init_memory();
-	return 0;
+	
+    //init_memory();
+
+    return 0;
 }
 

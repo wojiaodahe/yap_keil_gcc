@@ -7,60 +7,66 @@
 
 inline void enable_irq(void)
 {
-	int r4;
-	__asm  
-	{
-		mrs r4, cpsr
-		bic r4, r4, #0x80
-		msr cpsr_cxsf, r4
-	}
+  __asm__(
+            "mrs r0, cpsr\n"
+            "bic r0, r0, #0x80\n"
+            "msr cpsr_cxsf, r0\n"
+            :
+            :
+            :"r0"
+           );
 }
 
 inline void disable_irq(void)
 {
-	int r4;
-	__asm 
-	{
-		mrs r4, cpsr
-		orr r4, r4, #0x80
-		msr cpsr_cxsf, r4
-	}
+ __asm__(
+            "mrs r0, cpsr\n"
+            "orr r0, r0, #0x80\n"
+            "msr cpsr_cxsf, r0\n"
+            :
+            :
+            :"r0"
+           );
 }
 
 inline unsigned long arch_local_irq_save(void)
 {
-    unsigned flags, r4;
+      unsigned long flags = 0;
 
-    __asm
-    {
-		mrs r4, cpsr
-        mov flags, r4
-		orr r4, r4, #0x80
-		msr cpsr_cxsf, r4
-    }
+    __asm__ __volatile__(
+            "mrs r1, cpsr\n"
+            "mov %0, r1\n"
+            "orr r1, r1, #0x80\n"
+            "msr cpsr_cxsf, r1\n"
+            : "=r" (flags)
+            :
+            : "r1"
+           );
 
     return flags;
 }
 
 inline unsigned long arch_local_save_flags(void)
 {
-	int cp;
-	
-    __asm 
-	{
-		mrs cp, cpsr
-	}
+	unsigned long cp;
 
+    __asm__(
+            "mrs %0, cpsr\n"
+            :"=r" (cp)
+           );
+    
     return cp;
 }
 
-inline void arch_local_restore(unsigned int flags)
+inline void arch_local_irq_restore(unsigned int flags)
 {
-	__asm 
-	{
-		msr cpsr_cxsf, flags
-	}
+	 __asm__(
+            "msr cpsr_cxsf, %0\n"
+            :
+            :"r" (flags)
+           );
 }
+
 
 
 void umask_int(unsigned int offset)

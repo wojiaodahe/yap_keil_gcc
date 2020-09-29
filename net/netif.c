@@ -6,9 +6,12 @@
 #include "socket.h"
 #include "inet.h"
 #include "printk.h"
-#include "syslib.h"
+#include "lib.h"
 #include "wait.h"
 #include "bitops.h"
+#include "assert.h"
+#include "proc.h"
+#include "interrupt.h"
 
 static wait_queue_t rx_wq;
 static struct list_head netif_rx_queue;
@@ -93,6 +96,8 @@ static int netif_rx_thread(void *arg)
             eth_recv(skb);
         }
     }
+		
+		return 0;
 }
 
 void netif_rx(struct sk_buff *skb)

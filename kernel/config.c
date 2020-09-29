@@ -10,4 +10,4 @@ const unsigned int SYS_MODE_STACK				= 0x33c00000;
 const unsigned int MMU_TLB_BASE					= TLB_BASE;
 
 const unsigned int KMALLOC_ADDR_START			= 0x31000000;
-const unsigned int KMALLOC_MEM_SIZE				= USER_PROGRAM_SPACE_START - KMALLOC_ADDR_START;
+const unsigned int KMALLOC_MEM_SIZE				= USER_PROGRAM_SPACE_START - 0x31000000;

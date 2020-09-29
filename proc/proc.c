@@ -1,15 +1,17 @@
-#include "head.h"
+#include "mm.h"
+#include "arch.h"
 #include "kernel.h"
 #include "interrupt.h"
 #include "error.h"
 #include "config.h"
+#include "pcb.h"
 #include "proc.h"
 #include "wait.h"
 #include "timer.h"
-#include "syslib.h"
+#include "lib.h"
 #include "printk.h"
 #include "vfs.h"
-#include "inet.h"
+#include "syscall.h"
 #include "completion.h"
 
 extern void pcb_list_add(pcb_t *head, pcb_t *pcb);
@@ -51,13 +53,13 @@ void *get_process_sp()
 
 unsigned int get_cpsr(void)
 {
-	unsigned int p;
-	
-	__asm
-	{
-		mrs p, cpsr
-	}
-
+		unsigned long p;
+	asm volatile
+    (
+		"mrs %0,cpsr\n"
+		:"=r"(p)
+		:
+	);
 	return p;
 }
 
@@ -70,7 +72,8 @@ void thread_exit(void)
 }
 
 int kernel_thread(int (*f)(void *), void *args)
-{
+{ 
+    unsigned long flags;
 	unsigned int sp;
 	
 	pcb_t *pcb = (pcb_t *)alloc_pcb();
@@ -102,9 +105,14 @@ int kernel_thread(int (*f)(void *), void *args)
 	
 	DO_INIT_SP(pcb->sp, f, args, thread_exit, 0x1f & get_cpsr(), 0);
 
-	enter_critical();
-	pcb_list_add(&proc_list[pcb->prio].head, pcb);
-	exit_critical();
+//	enter_critical();
+    
+    local_irq_save(flags);
+
+    pcb_list_add(&proc_list[pcb->prio].head, pcb);
+    
+    local_irq_restore(flags);
+//  exit_critical();
 
 	return 0;
 }
@@ -365,6 +373,7 @@ void init_completion(struct completion *x)
 
 int OS_SYS_PROCESS(void *p)
 {
+#if 0
 	int src;
 	while (1)
     {
@@ -386,6 +395,11 @@ int OS_SYS_PROCESS(void *p)
         }
 	}
 	//return 0;
+    //
+#else
+    while (1)
+        ssleep(100);
+#endif
 }
 
 int OS_IDLE_PROCESS(void *arg)
@@ -642,7 +656,7 @@ int OS_INIT_PROCESS(void *argv)
 		OS_Sched();
 	}
     
-    return 0;
+    //return 0;
 }
 
 int OS_Init(void)
@@ -719,7 +733,17 @@ int OS_Init(void)
 
 int proc2pid(pcb_t *proc)
 {
+#if 0
     return proc->pid;
+#else
+    enter_critical();
+    
+    printk("Uncomplete Function %s\n", __func__);
+   
+    panic();
+
+    return 0;
+#endif
 }
 
 pcb_t *pid2proc(int pid)

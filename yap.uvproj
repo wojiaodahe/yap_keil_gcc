@@ -8,15 +8,15 @@
   <Targets>
     <Target>
       <TargetName>yap</TargetName>
-      <ToolsetNumber>0x4</ToolsetNumber>
-      <ToolsetName>ARM-ADS</ToolsetName>
+      <ToolsetNumber>0x3</ToolsetNumber>
+      <ToolsetName>ARM-GNU</ToolsetName>
       <TargetOption>
         <TargetCommonOption>
           <Device>S3C2440A</Device>
           <Vendor>Samsung</Vendor>
           <Cpu>IRAM(0x40000000-0x40000FFF) CLOCK(12000000) CPUTYPE(ARM920T)</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
-          <StartupFile>"STARTUP\Samsung\S3C2440.s" ("Samsung S3C2440 Startup Code")</StartupFile>
+          <StartupFile>"STARTUP/Samsung/S3C2440.s" ("Samsung S3C2440 Startup Code")</StartupFile>
           <FlashDriverDll>UL2ARM(-UV2077N9E -O40 -S0 -C0 -N00("ARM920T Core") -D00(0032409D) -L00(4) -FO7 -FD40000000 -FC1000 -FN1 -FF0S3C2440_NAND_SP -FS030000000 -FL07FFC000)</FlashDriverDll>
           <DeviceId>4277</DeviceId>
           <RegisterFile>S3C2440.H</RegisterFile>
@@ -34,8 +34,8 @@
           <BinPath></BinPath>
           <IncludePath></IncludePath>
           <LibPath></LibPath>
-          <RegisterFilePath>Samsung\</RegisterFilePath>
-          <DBRegisterFilePath>Samsung\</DBRegisterFilePath>
+          <RegisterFilePath></RegisterFilePath>
+          <DBRegisterFilePath>Samsung/</DBRegisterFilePath>
           <TargetStatus>
             <Error>0</Error>
             <ExitCodeStop>0</ExitCodeStop>
@@ -44,13 +44,13 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\output\</OutputDirectory>
-          <OutputName>Yap</OutputName>
+          <OutputName>yap</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>1</CreateHexFile>
+          <CreateHexFile>0</CreateHexFile>
           <DebugInformation>1</DebugInformation>
-          <BrowseInformation>1</BrowseInformation>
-          <ListingPath>.\listing\</ListingPath>
+          <BrowseInformation>0</BrowseInformation>
+          <ListingPath>.\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -75,7 +75,7 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>fromelf.exe --bin -o yap.bin output/yap.axf</UserProg1Name>
+            <UserProg1Name>D:\swap\Coding\yap_keil_gcc\objdump.bat</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -129,14 +129,14 @@
           </Simulator>
           <Target>
             <UseTarget>1</UseTarget>
-            <LoadApplicationAtStartup>0</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
+            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
+            <RunToMain>0</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
             <RestoreWatchpoints>1</RestoreWatchpoints>
             <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
             <RestoreFunctions>0</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
-            <RestoreTracepoints>0</RestoreTracepoints>
+            <RestoreTracepoints>1</RestoreTracepoints>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
           <TargetSelection>6</TargetSelection>
@@ -161,18 +161,18 @@
             <UseTargetDll>1</UseTargetDll>
             <UseExternalTool>0</UseExternalTool>
             <RunIndependent>0</RunIndependent>
-            <UpdateFlashBeforeDebugging>0</UpdateFlashBeforeDebugging>
+            <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4098</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
-          <bUseTDR>0</bUseTDR>
-          <Flash2>Segger\JLTAgdi.dll</Flash2>
-          <Flash3>"D:\swap\Coding\TinyOS\JLinkArm_ram_or_nand.ini" ()</Flash3>
+          <bUseTDR>1</bUseTDR>
+          <Flash2>BIN/UL2ARM.DLL</Flash2>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
         </Utilities>
-        <TargetArmAds>
-          <ArmAdsMisc>
-            <GenerateListings>0</GenerateListings>
+        <TargetArm>
+          <ArmMisc>
+            <asLst>0</asLst>
             <asHll>1</asHll>
             <asAsm>1</asAsm>
             <asMacX>1</asMacX>
@@ -184,23 +184,7 @@
             <ldmm>1</ldmm>
             <ldXref>1</ldXref>
             <BigEnd>0</BigEnd>
-            <AdsALst>1</AdsALst>
-            <AdsACrf>1</AdsACrf>
-            <AdsANop>0</AdsANop>
-            <AdsANot>0</AdsANot>
-            <AdsLLst>1</AdsLLst>
-            <AdsLmap>1</AdsLmap>
-            <AdsLcgr>1</AdsLcgr>
-            <AdsLsym>1</AdsLsym>
-            <AdsLszi>1</AdsLszi>
-            <AdsLtoi>1</AdsLtoi>
-            <AdsLsun>1</AdsLsun>
-            <AdsLven>1</AdsLven>
-            <AdsLsxf>1</AdsLsxf>
-            <RvctClst>0</RvctClst>
-            <GenPPlst>0</GenPPlst>
-            <AdsCpuType>ARM920T</AdsCpuType>
-            <RvctDeviceName></RvctDeviceName>
+            <GCPUTYP>ARM920T</GCPUTYP>
             <mOS>0</mOS>
             <uocRom>0</uocRom>
             <uocRam>0</uocRam>
@@ -211,29 +195,6 @@
             <RvdsVP>0</RvdsVP>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
-            <StupSel>1</StupSel>
-            <useUlib>0</useUlib>
-            <EndSel>0</EndSel>
-            <uLtcg>0</uLtcg>
-            <RoSelD>0</RoSelD>
-            <RwSelD>3</RwSelD>
-            <CodeSel>0</CodeSel>
-            <OptFeed>0</OptFeed>
-            <NoZi1>0</NoZi1>
-            <NoZi2>0</NoZi2>
-            <NoZi3>0</NoZi3>
-            <NoZi4>0</NoZi4>
-            <NoZi5>0</NoZi5>
-            <Ro1Chk>1</Ro1Chk>
-            <Ro2Chk>0</Ro2Chk>
-            <Ro3Chk>0</Ro3Chk>
-            <Ir1Chk>0</Ir1Chk>
-            <Ir2Chk>0</Ir2Chk>
-            <Ra1Chk>1</Ra1Chk>
-            <Ra2Chk>0</Ra2Chk>
-            <Ra3Chk>0</Ra3Chk>
-            <Im1Chk>1</Im1Chk>
-            <Im2Chk>0</Im2Chk>
             <OnChipMemories>
               <Ocm1>
                 <Type>0</Type>
@@ -280,113 +241,60 @@
                 <StartAddress>0x0</StartAddress>
                 <Size>0x0</Size>
               </XRAM>
-              <OCR_RVCT1>
-                <Type>1</Type>
-                <StartAddress>0x30000000</StartAddress>
-                <Size>0x800000</Size>
-              </OCR_RVCT1>
-              <OCR_RVCT2>
-                <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
-              </OCR_RVCT2>
-              <OCR_RVCT3>
-                <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
-              </OCR_RVCT3>
-              <OCR_RVCT4>
-                <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
-              </OCR_RVCT4>
-              <OCR_RVCT5>
-                <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
-              </OCR_RVCT5>
-              <OCR_RVCT6>
-                <Type>0</Type>
-                <StartAddress>0x30800000</StartAddress>
-                <Size>0xf00000</Size>
-              </OCR_RVCT6>
-              <OCR_RVCT7>
+              <IRAM2>
                 <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
                 <Size>0x0</Size>
-              </OCR_RVCT7>
-              <OCR_RVCT8>
+              </IRAM2>
+              <IROM2>
                 <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
                 <Size>0x0</Size>
-              </OCR_RVCT8>
-              <OCR_RVCT9>
-                <Type>0</Type>
-                <StartAddress>0x40000000</StartAddress>
-                <Size>0x1000</Size>
-              </OCR_RVCT9>
-              <OCR_RVCT10>
-                <Type>0</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
-              </OCR_RVCT10>
+              </IROM2>
             </OnChipMemories>
-            <RvctStartVector></RvctStartVector>
-          </ArmAdsMisc>
-          <Cads>
+          </ArmMisc>
+          <Carm>
+            <arpcs>1</arpcs>
+            <stkchk>0</stkchk>
+            <reentr>0</reentr>
             <interw>0</interw>
-            <Optim>1</Optim>
-            <oTime>0</oTime>
-            <SplitLS>0</SplitLS>
-            <OneElfS>0</OneElfS>
+            <bigend>0</bigend>
             <Strict>0</Strict>
-            <EnumInt>0</EnumInt>
-            <PlainCh>0</PlainCh>
-            <Ropi>0</Ropi>
-            <Rwpi>0</Rwpi>
+            <Optim>1</Optim>
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
-            <uSurpInc>0</uSurpInc>
             <VariousControls>
-              <MiscControls>--gnu</MiscControls>
+              <MiscControls>-g -nostdlib -Wall -fno-builtin</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\include;.\kernel;.\arch\arm</IncludePath>
+              <IncludePath>./include;./arch/arm</IncludePath>
             </VariousControls>
-          </Cads>
-          <Aads>
-            <interw>0</interw>
-            <Ropi>0</Ropi>
-            <Rwpi>0</Rwpi>
-            <thumb>0</thumb>
-            <SplitLS>0</SplitLS>
-            <SwStkChk>0</SwStkChk>
-            <NoWarn>0</NoWarn>
-            <uSurpInc>0</uSurpInc>
+          </Carm>
+          <Aarm>
+            <bBE>0</bBE>
+            <interw>1</interw>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\inc</IncludePath>
+              <IncludePath></IncludePath>
             </VariousControls>
-          </Aads>
-          <LDads>
+          </Aarm>
+          <LDarm>
             <umfTarg>1</umfTarg>
-            <Ropi>0</Ropi>
-            <Rwpi>0</Rwpi>
-            <noStLib>0</noStLib>
-            <RepFail>1</RepFail>
-            <useFile>0</useFile>
-            <TextAddressRange>0x00000000</TextAddressRange>
-            <DataAddressRange>0x40000000</DataAddressRange>
-            <ScatterFile>.\output\TinyOS.sct</ScatterFile>
+            <enaGarb>0</enaGarb>
+            <noStart>1</noStart>
+            <noStLib>1</noStLib>
+            <uMathLib>0</uMathLib>
+            <TextAddressRange></TextAddressRange>
+            <DataAddressRange></DataAddressRange>
+            <BSSAddressRange></BSSAddressRange>
             <IncludeLibs></IncludeLibs>
-            <IncludeLibsPath></IncludeLibsPath>
-            <Misc>--sort=CallTree</Misc>
-            <LinkerInputFile></LinkerInputFile>
-            <DisabledWarnings></DisabledWarnings>
-          </LDads>
-        </TargetArmAds>
+            <IncludeDir></IncludeDir>
+            <Misc>-lc -lgcc -nostdlib -Ttext 30000000</Misc>
+            <ScatterFile>./yap.lds</ScatterFile>
+          </LDarm>
+        </TargetArm>
       </TargetOption>
       <Groups>
         <Group>
@@ -395,52 +303,52 @@
             <File>
               <FileName>s3c24xx.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\s3c24xx.h</FilePath>
+              <FilePath>./include/s3c24xx.h</FilePath>
             </File>
             <File>
               <FileName>system.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\system.h</FilePath>
+              <FilePath>./include/system.h</FilePath>
             </File>
             <File>
               <FileName>uart.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\uart.h</FilePath>
+              <FilePath>./include/uart.h</FilePath>
             </File>
             <File>
               <FileName>common.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\common.h</FilePath>
+              <FilePath>./include/common.h</FilePath>
             </File>
             <File>
               <FileName>head.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\head.h</FilePath>
+              <FilePath>./include/head.h</FilePath>
             </File>
             <File>
               <FileName>i_socket.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\i_socket.h</FilePath>
+              <FilePath>./include/i_socket.h</FilePath>
             </File>
             <File>
               <FileName>arp.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\arp.h</FilePath>
+              <FilePath>./include/arp.h</FilePath>
             </File>
             <File>
               <FileName>DM9000.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\DM9000.h</FilePath>
+              <FilePath>./include/DM9000.h</FilePath>
             </File>
             <File>
               <FileName>pcb.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\pcb.h</FilePath>
+              <FilePath>./include/pcb.h</FilePath>
             </File>
             <File>
               <FileName>spinlock_types.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\spinlock_types.h</FilePath>
+              <FilePath>./include/spinlock_types.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -450,32 +358,32 @@
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\main.c</FilePath>
+              <FilePath>./kernel/main.c</FilePath>
             </File>
             <File>
               <FileName>syscall.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\syscall.c</FilePath>
+              <FilePath>./kernel/syscall.c</FilePath>
             </File>
             <File>
               <FileName>assert.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\assert.c</FilePath>
+              <FilePath>./kernel/assert.c</FilePath>
             </File>
             <File>
               <FileName>config.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\config.c</FilePath>
+              <FilePath>./kernel/config.c</FilePath>
             </File>
             <File>
               <FileName>machine.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\machine.c</FilePath>
+              <FilePath>./kernel/machine.c</FilePath>
             </File>
             <File>
               <FileName>interrupt.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\interrupt.c</FilePath>
+              <FilePath>./kernel/interrupt.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -485,22 +393,22 @@
             <File>
               <FileName>pcb.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\proc\pcb.c</FilePath>
+              <FilePath>./proc/pcb.c</FilePath>
             </File>
             <File>
               <FileName>proc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\proc\proc.c</FilePath>
+              <FilePath>./proc/proc.c</FilePath>
             </File>
             <File>
               <FileName>spinlock.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\proc\spinlock.c</FilePath>
+              <FilePath>./proc/spinlock.c</FilePath>
             </File>
             <File>
               <FileName>preempt.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\proc\preempt.c</FilePath>
+              <FilePath>./proc/preempt.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -510,27 +418,22 @@
             <File>
               <FileName>head.S</FileName>
               <FileType>2</FileType>
-              <FilePath>.\arch\arm\head.S</FilePath>
-            </File>
-            <File>
-              <FileName>2440slib.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\arch\arm\2440slib.s</FilePath>
+              <FilePath>./arch/arm/head.S</FilePath>
             </File>
             <File>
               <FileName>s3c24xx_irq.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\arch\arm\s3c24xx_irq.c</FilePath>
+              <FilePath>./arch/arm/s3c24xx_irq.c</FilePath>
             </File>
             <File>
               <FileName>init_system.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\arch\arm\init_system.c</FilePath>
+              <FilePath>./arch/arm/init_system.c</FilePath>
             </File>
             <File>
               <FileName>arch_spinlock.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\arch\arm\asm\arch_spinlock.c</FilePath>
+              <FilePath>./arch/arm/asm/arch_spinlock.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -540,97 +443,97 @@
             <File>
               <FileName>key.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\key.c</FilePath>
+              <FilePath>./driver/key.c</FilePath>
             </File>
             <File>
               <FileName>led.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\led.c</FilePath>
+              <FilePath>./driver/led.c</FilePath>
             </File>
             <File>
               <FileName>block_dev.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\block_dev.c</FilePath>
+              <FilePath>./driver/block_dev.c</FilePath>
             </File>
             <File>
               <FileName>char_dev.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\char_dev.c</FilePath>
+              <FilePath>./driver/char_dev.c</FilePath>
             </File>
             <File>
               <FileName>timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\timer.c</FilePath>
+              <FilePath>./driver/timer.c</FilePath>
             </File>
             <File>
               <FileName>device.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\device.c</FilePath>
+              <FilePath>./driver/device.c</FilePath>
             </File>
             <File>
               <FileName>nand.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\nand.c</FilePath>
+              <FilePath>./driver/nand.c</FilePath>
             </File>
             <File>
               <FileName>s3c24xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\serial\s3c24xx.c</FilePath>
+              <FilePath>./driver/serial/s3c24xx.c</FilePath>
             </File>
             <File>
               <FileName>tty.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\tty\tty.c</FilePath>
+              <FilePath>./driver/tty/tty.c</FilePath>
             </File>
             <File>
               <FileName>test_platform.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\test_platform.c</FilePath>
+              <FilePath>./driver/test_platform.c</FilePath>
             </File>
             <File>
               <FileName>led_device.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\led_device.c</FilePath>
+              <FilePath>./driver/led_device.c</FilePath>
             </File>
             <File>
               <FileName>led_driver.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\led_driver.c</FilePath>
+              <FilePath>./driver/led_driver.c</FilePath>
             </File>
             <File>
               <FileName>platform.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\platform.c</FilePath>
+              <FilePath>./driver/platform.c</FilePath>
             </File>
             <File>
               <FileName>net_dev.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\net\net_dev.c</FilePath>
+              <FilePath>./driver/net/net_dev.c</FilePath>
             </File>
             <File>
               <FileName>DM9000.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\net\DM9000.c</FilePath>
+              <FilePath>./driver/net/DM9000.c</FilePath>
             </File>
             <File>
               <FileName>spi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\spi\spi.c</FilePath>
+              <FilePath>./driver/spi/spi.c</FilePath>
             </File>
             <File>
               <FileName>spi_s3c24xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\spi\spi_s3c24xx.c</FilePath>
+              <FilePath>./driver/spi/spi_s3c24xx.c</FilePath>
             </File>
             <File>
               <FileName>spi_jz2440_info.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\spi\spi_jz2440_info.c</FilePath>
+              <FilePath>./driver/spi/spi_jz2440_info.c</FilePath>
             </File>
             <File>
               <FileName>spi_oled.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\spi\spi_oled.c</FilePath>
+              <FilePath>./driver/spi/spi_oled.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -640,17 +543,17 @@
             <File>
               <FileName>printk.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\lib\printk.c</FilePath>
+              <FilePath>./lib/printk.c</FilePath>
             </File>
             <File>
               <FileName>lib.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\lib\lib.c</FilePath>
+              <FilePath>./lib/lib.c</FilePath>
             </File>
             <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\lib\list.c</FilePath>
+              <FilePath>./lib/list.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -660,7 +563,7 @@
             <File>
               <FileName>message.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\ipc\message.c</FilePath>
+              <FilePath>./ipc/message.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -670,22 +573,22 @@
             <File>
               <FileName>ramdisk.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\fs\ramdisk.c</FilePath>
+              <FilePath>./fs/ramdisk.c</FilePath>
             </File>
             <File>
               <FileName>ramfs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\fs\ramfs.c</FilePath>
+              <FilePath>./fs/ramfs.c</FilePath>
             </File>
             <File>
               <FileName>vfs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\fs\vfs.c</FilePath>
+              <FilePath>./fs/vfs.c</FilePath>
             </File>
             <File>
               <FileName>ofs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\fs\ofs.c</FilePath>
+              <FilePath>./fs/ofs.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -695,12 +598,12 @@
             <File>
               <FileName>kmalloc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\mm\kmalloc.c</FilePath>
+              <FilePath>./mm/kmalloc.c</FilePath>
             </File>
             <File>
               <FileName>mm.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\mm\mm.c</FilePath>
+              <FilePath>./mm/mm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -710,7 +613,7 @@
             <File>
               <FileName>user_syscall.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\user_program\user_syscall.s</FilePath>
+              <FilePath>./user_program/user_syscall.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -720,57 +623,57 @@
             <File>
               <FileName>inet_socket.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\inet_socket.c</FilePath>
+              <FilePath>./net/inet/inet_socket.c</FilePath>
             </File>
             <File>
               <FileName>raw.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\raw.c</FilePath>
+              <FilePath>./net/inet/raw.c</FilePath>
             </File>
             <File>
               <FileName>tcp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\tcp.c</FilePath>
+              <FilePath>./net/inet/tcp.c</FilePath>
             </File>
             <File>
               <FileName>udp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\udp.c</FilePath>
+              <FilePath>./net/inet/udp.c</FilePath>
             </File>
             <File>
               <FileName>socket.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\socket.c</FilePath>
+              <FilePath>./net/socket.c</FilePath>
             </File>
             <File>
               <FileName>arp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\arp.c</FilePath>
+              <FilePath>./net/inet/arp.c</FilePath>
             </File>
             <File>
               <FileName>eth.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\eth.c</FilePath>
+              <FilePath>./net/inet/eth.c</FilePath>
             </File>
             <File>
               <FileName>icmp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\icmp.c</FilePath>
+              <FilePath>./net/inet/icmp.c</FilePath>
             </File>
             <File>
               <FileName>ip.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\ip.c</FilePath>
+              <FilePath>./net/inet/ip.c</FilePath>
             </File>
             <File>
               <FileName>inet.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\inet.c</FilePath>
+              <FilePath>./net/inet/inet.c</FilePath>
             </File>
             <File>
               <FileName>netif.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\netif.c</FilePath>
+              <FilePath>./net/netif.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -780,7 +683,7 @@
             <File>
               <FileName>oled.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\test\oled.c</FilePath>
+              <FilePath>./test/oled.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -796,7 +699,7 @@
           <Vendor>Samsung</Vendor>
           <Cpu>IRAM(0x40000000-0x40000FFF) CLOCK(12000000) CPUTYPE(ARM920T)</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
-          <StartupFile>"STARTUP\Samsung\S3C2440.s" ("Samsung S3C2440 Startup Code")</StartupFile>
+          <StartupFile>"STARTUP/Samsung/S3C2440.s" ("Samsung S3C2440 Startup Code")</StartupFile>
           <FlashDriverDll>UL2ARM(-UV2077N9E -O40 -S0 -C0 -N00("ARM920T Core") -D00(0032409D) -L00(4) -FO7 -FD40000000 -FC1000 -FN1 -FF0S3C2440_NAND_SP -FS030000000 -FL07FFC000)</FlashDriverDll>
           <DeviceId>4277</DeviceId>
           <RegisterFile>S3C2440.H</RegisterFile>
@@ -814,8 +717,8 @@
           <BinPath></BinPath>
           <IncludePath></IncludePath>
           <LibPath></LibPath>
-          <RegisterFilePath>Samsung\</RegisterFilePath>
-          <DBRegisterFilePath>Samsung\</DBRegisterFilePath>
+          <RegisterFilePath>Samsung/</RegisterFilePath>
+          <DBRegisterFilePath>Samsung/</DBRegisterFilePath>
           <TargetStatus>
             <Error>0</Error>
             <ExitCodeStop>0</ExitCodeStop>
@@ -823,7 +726,7 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\output\</OutputDirectory>
+          <OutputDirectory>./output/</OutputDirectory>
           <OutputName>TQ2440_Test</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
@@ -946,7 +849,7 @@
             <DriverSelection>4098</DriverSelection>
           </Flash1>
           <bUseTDR>0</bUseTDR>
-          <Flash2>Segger\JLTAgdi.dll</Flash2>
+          <Flash2>Segger/JLTAgdi.dll</Flash2>
           <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
         </Utilities>
@@ -1131,7 +1034,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\inc</IncludePath>
+              <IncludePath>./inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1147,7 +1050,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\inc</IncludePath>
+              <IncludePath>./inc</IncludePath>
             </VariousControls>
           </Aads>
           <LDads>
@@ -1159,7 +1062,7 @@
             <useFile>0</useFile>
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0x40000000</DataAddressRange>
-            <ScatterFile>.\output\TQ2440_Test.sct</ScatterFile>
+            <ScatterFile>./output/TQ2440_Test.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc>--sort=CallTree</Misc>
@@ -1175,52 +1078,52 @@
             <File>
               <FileName>s3c24xx.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\s3c24xx.h</FilePath>
+              <FilePath>./include/s3c24xx.h</FilePath>
             </File>
             <File>
               <FileName>system.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\system.h</FilePath>
+              <FilePath>./include/system.h</FilePath>
             </File>
             <File>
               <FileName>uart.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\uart.h</FilePath>
+              <FilePath>./include/uart.h</FilePath>
             </File>
             <File>
               <FileName>common.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\common.h</FilePath>
+              <FilePath>./include/common.h</FilePath>
             </File>
             <File>
               <FileName>head.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\head.h</FilePath>
+              <FilePath>./include/head.h</FilePath>
             </File>
             <File>
               <FileName>i_socket.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\i_socket.h</FilePath>
+              <FilePath>./include/i_socket.h</FilePath>
             </File>
             <File>
               <FileName>arp.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\arp.h</FilePath>
+              <FilePath>./include/arp.h</FilePath>
             </File>
             <File>
               <FileName>DM9000.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\DM9000.h</FilePath>
+              <FilePath>./include/DM9000.h</FilePath>
             </File>
             <File>
               <FileName>pcb.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\pcb.h</FilePath>
+              <FilePath>./include/pcb.h</FilePath>
             </File>
             <File>
               <FileName>spinlock_types.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\include\spinlock_types.h</FilePath>
+              <FilePath>./include/spinlock_types.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1230,32 +1133,32 @@
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\main.c</FilePath>
+              <FilePath>./kernel/main.c</FilePath>
             </File>
             <File>
               <FileName>syscall.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\syscall.c</FilePath>
+              <FilePath>./kernel/syscall.c</FilePath>
             </File>
             <File>
               <FileName>assert.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\assert.c</FilePath>
+              <FilePath>./kernel/assert.c</FilePath>
             </File>
             <File>
               <FileName>config.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\config.c</FilePath>
+              <FilePath>./kernel/config.c</FilePath>
             </File>
             <File>
               <FileName>machine.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\machine.c</FilePath>
+              <FilePath>./kernel/machine.c</FilePath>
             </File>
             <File>
               <FileName>interrupt.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\kernel\interrupt.c</FilePath>
+              <FilePath>./kernel/interrupt.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1265,22 +1168,22 @@
             <File>
               <FileName>pcb.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\proc\pcb.c</FilePath>
+              <FilePath>./proc/pcb.c</FilePath>
             </File>
             <File>
               <FileName>proc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\proc\proc.c</FilePath>
+              <FilePath>./proc/proc.c</FilePath>
             </File>
             <File>
               <FileName>spinlock.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\proc\spinlock.c</FilePath>
+              <FilePath>./proc/spinlock.c</FilePath>
             </File>
             <File>
               <FileName>preempt.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\proc\preempt.c</FilePath>
+              <FilePath>./proc/preempt.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1290,27 +1193,22 @@
             <File>
               <FileName>head.S</FileName>
               <FileType>2</FileType>
-              <FilePath>.\arch\arm\head.S</FilePath>
-            </File>
-            <File>
-              <FileName>2440slib.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\arch\arm\2440slib.s</FilePath>
+              <FilePath>./arch/arm/head.S</FilePath>
             </File>
             <File>
               <FileName>s3c24xx_irq.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\arch\arm\s3c24xx_irq.c</FilePath>
+              <FilePath>./arch/arm/s3c24xx_irq.c</FilePath>
             </File>
             <File>
               <FileName>init_system.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\arch\arm\init_system.c</FilePath>
+              <FilePath>./arch/arm/init_system.c</FilePath>
             </File>
             <File>
               <FileName>arch_spinlock.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\arch\arm\asm\arch_spinlock.c</FilePath>
+              <FilePath>./arch/arm/asm/arch_spinlock.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1320,97 +1218,97 @@
             <File>
               <FileName>key.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\key.c</FilePath>
+              <FilePath>./driver/key.c</FilePath>
             </File>
             <File>
               <FileName>led.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\led.c</FilePath>
+              <FilePath>./driver/led.c</FilePath>
             </File>
             <File>
               <FileName>block_dev.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\block_dev.c</FilePath>
+              <FilePath>./driver/block_dev.c</FilePath>
             </File>
             <File>
               <FileName>char_dev.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\char_dev.c</FilePath>
+              <FilePath>./driver/char_dev.c</FilePath>
             </File>
             <File>
               <FileName>timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\timer.c</FilePath>
+              <FilePath>./driver/timer.c</FilePath>
             </File>
             <File>
               <FileName>device.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\device.c</FilePath>
+              <FilePath>./driver/device.c</FilePath>
             </File>
             <File>
               <FileName>nand.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\nand.c</FilePath>
+              <FilePath>./driver/nand.c</FilePath>
             </File>
             <File>
               <FileName>s3c24xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\serial\s3c24xx.c</FilePath>
+              <FilePath>./driver/serial/s3c24xx.c</FilePath>
             </File>
             <File>
               <FileName>tty.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\tty\tty.c</FilePath>
+              <FilePath>./driver/tty/tty.c</FilePath>
             </File>
             <File>
               <FileName>test_platform.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\test_platform.c</FilePath>
+              <FilePath>./driver/test_platform.c</FilePath>
             </File>
             <File>
               <FileName>led_device.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\led_device.c</FilePath>
+              <FilePath>./driver/led_device.c</FilePath>
             </File>
             <File>
               <FileName>led_driver.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\led_driver.c</FilePath>
+              <FilePath>./driver/led_driver.c</FilePath>
             </File>
             <File>
               <FileName>platform.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\platform.c</FilePath>
+              <FilePath>./driver/platform.c</FilePath>
             </File>
             <File>
               <FileName>net_dev.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\net\net_dev.c</FilePath>
+              <FilePath>./driver/net/net_dev.c</FilePath>
             </File>
             <File>
               <FileName>DM9000.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\net\DM9000.c</FilePath>
+              <FilePath>./driver/net/DM9000.c</FilePath>
             </File>
             <File>
               <FileName>spi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\spi\spi.c</FilePath>
+              <FilePath>./driver/spi/spi.c</FilePath>
             </File>
             <File>
               <FileName>spi_s3c24xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\spi\spi_s3c24xx.c</FilePath>
+              <FilePath>./driver/spi/spi_s3c24xx.c</FilePath>
             </File>
             <File>
               <FileName>spi_jz2440_info.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\spi\spi_jz2440_info.c</FilePath>
+              <FilePath>./driver/spi/spi_jz2440_info.c</FilePath>
             </File>
             <File>
               <FileName>spi_oled.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\driver\spi\spi_oled.c</FilePath>
+              <FilePath>./driver/spi/spi_oled.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1420,17 +1318,17 @@
             <File>
               <FileName>printk.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\lib\printk.c</FilePath>
+              <FilePath>./lib/printk.c</FilePath>
             </File>
             <File>
               <FileName>lib.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\lib\lib.c</FilePath>
+              <FilePath>./lib/lib.c</FilePath>
             </File>
             <File>
               <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\lib\list.c</FilePath>
+              <FilePath>./lib/list.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1440,7 +1338,7 @@
             <File>
               <FileName>message.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\ipc\message.c</FilePath>
+              <FilePath>./ipc/message.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1450,22 +1348,22 @@
             <File>
               <FileName>ramdisk.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\fs\ramdisk.c</FilePath>
+              <FilePath>./fs/ramdisk.c</FilePath>
             </File>
             <File>
               <FileName>ramfs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\fs\ramfs.c</FilePath>
+              <FilePath>./fs/ramfs.c</FilePath>
             </File>
             <File>
               <FileName>vfs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\fs\vfs.c</FilePath>
+              <FilePath>./fs/vfs.c</FilePath>
             </File>
             <File>
               <FileName>ofs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\fs\ofs.c</FilePath>
+              <FilePath>./fs/ofs.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1475,12 +1373,12 @@
             <File>
               <FileName>kmalloc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\mm\kmalloc.c</FilePath>
+              <FilePath>./mm/kmalloc.c</FilePath>
             </File>
             <File>
               <FileName>mm.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\mm\mm.c</FilePath>
+              <FilePath>./mm/mm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1490,7 +1388,7 @@
             <File>
               <FileName>user_syscall.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\user_program\user_syscall.s</FilePath>
+              <FilePath>./user_program/user_syscall.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -1500,57 +1398,57 @@
             <File>
               <FileName>inet_socket.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\inet_socket.c</FilePath>
+              <FilePath>./net/inet/inet_socket.c</FilePath>
             </File>
             <File>
               <FileName>raw.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\raw.c</FilePath>
+              <FilePath>./net/inet/raw.c</FilePath>
             </File>
             <File>
               <FileName>tcp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\tcp.c</FilePath>
+              <FilePath>./net/inet/tcp.c</FilePath>
             </File>
             <File>
               <FileName>udp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\udp.c</FilePath>
+              <FilePath>./net/inet/udp.c</FilePath>
             </File>
             <File>
               <FileName>socket.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\socket.c</FilePath>
+              <FilePath>./net/socket.c</FilePath>
             </File>
             <File>
               <FileName>arp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\arp.c</FilePath>
+              <FilePath>./net/inet/arp.c</FilePath>
             </File>
             <File>
               <FileName>eth.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\eth.c</FilePath>
+              <FilePath>./net/inet/eth.c</FilePath>
             </File>
             <File>
               <FileName>icmp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\icmp.c</FilePath>
+              <FilePath>./net/inet/icmp.c</FilePath>
             </File>
             <File>
               <FileName>ip.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\ip.c</FilePath>
+              <FilePath>./net/inet/ip.c</FilePath>
             </File>
             <File>
               <FileName>inet.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\family\inet\inet.c</FilePath>
+              <FilePath>./net/inet/inet.c</FilePath>
             </File>
             <File>
               <FileName>netif.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\net\netif.c</FilePath>
+              <FilePath>./net/netif.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1560,7 +1458,7 @@
             <File>
               <FileName>oled.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\test\oled.c</FilePath>
+              <FilePath>./test/oled.c</FilePath>
             </File>
           </Files>
         </Group>

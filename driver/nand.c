@@ -9,7 +9,7 @@
 #include "ofs.h"
 #include "common.h"
 #include "printk.h"
-#include "syslib.h"
+#include "lib.h"
 #include "kmalloc.h"
 
 
@@ -357,7 +357,7 @@ extern struct inode_operations ofs_inode_operations;
 int nand_do_request(struct request *req)
 {
 	int i;
-	int len;
+	int len = 0;
 	char *b = NULL;
 	char *tmp;
 
