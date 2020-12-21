@@ -767,7 +767,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>385</TopLine>
+      <TopLine>386</TopLine>
       <CurrentLine>388</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>./proc/fork.c</PathWithFileName>
@@ -1650,7 +1650,7 @@
       <TopLine>0</TopLine>
       <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\mm\bootmem.c</PathWithFileName>
+      <PathWithFileName>./mm/bootmem.c</PathWithFileName>
       <FilenameWithoutPath>bootmem.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
