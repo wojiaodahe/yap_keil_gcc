@@ -3,7 +3,7 @@
 
 #include "mm.h"
 #include "list.h"
-#include "spin_lock.h"
+#include "spinlock.h"
 
 #define BUFCTL_END 0xffffFFFF
 #define	SLAB_LIMIT 0xffffFFFE

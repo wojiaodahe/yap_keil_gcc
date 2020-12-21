@@ -347,10 +347,11 @@ void wait_for_completion(struct completion *x)
 
 void complete(struct completion *x)
 {
+	unsigned long flags;
     wait_queue_t *wq;
     struct list_head *list;
 
-    spin_lock_irqsave(&x->wq.lock);  
+    spin_lock_irqsave(&x->wq.lock, flags);  
    
     x->done++;
    
@@ -362,7 +363,7 @@ void complete(struct completion *x)
 
         set_task_state(wq->priv, PROCESS_READY);
     }
-    spin_unlock_irqrestore(&x->wq.lock);
+    spin_unlock_irqrestore(&x->wq.lock, flags);
 }
 
 void init_completion(struct completion *x)

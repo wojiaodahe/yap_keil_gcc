@@ -1,0 +1,43 @@
+#include "bootmem.h"
+#include "page.h"
+#include "mmzone.h"
+
+#include "mm.h"
+
+unsigned long free_all_bootmem_core(pg_data_t *pgdat)
+{
+	struct page *page = pgdat->node_mem_map;
+	bootmem_data_t *bdata = pgdat->bdata;
+	unsigned long i, count, total = 0;
+	unsigned long idx;
+
+	count = 0;
+	idx = bdata->node_low_pfn - (bdata->node_boot_start >> PAGE_SHIFT);
+	for (i = 0; i < idx; i++, page++) 
+    {
+        count++;
+        ClearPageReserved(page);
+        set_page_count(page, 1);
+        __free_page(page);
+    }
+    total += count;
+
+#if 0
+    /*
+	 * Now free the allocator bitmap itself, it's not
+	 * needed anymore:
+	 */
+	page = virt_to_page(bdata->node_bootmem_map);
+	count = 0;
+	for (i = 0; i < ((bdata->node_low_pfn-(bdata->node_boot_start >> PAGE_SHIFT))/8 + PAGE_SIZE-1)/PAGE_SIZE; i++,page++) {
+		count++;
+		ClearPageReserved(page);
+		set_page_count(page, 1);
+		__free_page(page);
+	}
+	total += count;
+	bdata->node_bootmem_map = NULL;
+#endif
+
+	return total;
+}

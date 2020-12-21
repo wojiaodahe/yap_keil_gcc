@@ -93,7 +93,7 @@ typedef struct page
     unsigned long flags;
     struct list_head lru;
     unsigned long age;
-    //wait_queue_head_t wait;
+    wait_queue_t wait;
     struct buffer_head *buffers;
     void *virtual;
     struct zone_struct *zone;

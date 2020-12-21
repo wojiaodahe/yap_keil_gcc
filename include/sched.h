@@ -2,7 +2,8 @@
 #define __KERNEL_SCHED_H__
 
 #include "mm.h"
-#include "spin_lock.h"
+#include "wait.h"
+#include "spinlock.h"
 #include "atomic.h"
 #include "slab.h"
 #include "fs.h"
@@ -40,6 +41,9 @@ struct task_struct
     struct file *filp[NR_OPEN];
     struct inode *pwd;
     struct inode *root;
+
+    wait_queue_t wait_childexit;
+    spinlock_t alloc_lock;
 
     unsigned long min_flt, maj_flt, nswap, cmin_flt, cmaj_flt, cnswap;
 };
