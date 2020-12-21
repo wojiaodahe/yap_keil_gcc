@@ -75,7 +75,7 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>D:\swap\Coding\yap_keil_gcc\objdump.bat</UserProg1Name>
+            <UserProg1Name>objdump.bat</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -121,7 +121,7 @@
             <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
             <RunToMain>1</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
+            <RestoreWatchpoints>0</RestoreWatchpoints>
             <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
             <RestoreFunctions>1</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
@@ -145,7 +145,7 @@
             <CpuDllArguments></CpuDllArguments>
             <PeripheralDll></PeripheralDll>
             <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
+            <InitializationFile>.\Ext_RAM.ini</InitializationFile>
           </SimDlls>
           <TargetDlls>
             <CpuDll></CpuDll>
@@ -161,12 +161,12 @@
             <UseTargetDll>1</UseTargetDll>
             <UseExternalTool>0</UseExternalTool>
             <RunIndependent>0</RunIndependent>
-            <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
+            <UpdateFlashBeforeDebugging>0</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
             <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>BIN/UL2ARM.DLL</Flash2>
+          <Flash2>BIN\UL2ARM.DLL</Flash2>
           <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
         </Utilities>
@@ -264,17 +264,17 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <VariousControls>
-              <MiscControls>-g -nostdlib -Wall -fno-builtin</MiscControls>
+              <MiscControls>-g -nostdlib -Wall -fno-builtin -march=armv4</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>./include;./arch/arm</IncludePath>
+              <IncludePath>./include;./arch/arm;.\arch</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
             <bBE>0</bBE>
             <interw>1</interw>
             <VariousControls>
-              <MiscControls></MiscControls>
+              <MiscControls>-g -march=armv4</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
@@ -384,6 +384,16 @@
               <FileName>interrupt.c</FileName>
               <FileType>1</FileType>
               <FilePath>./kernel/interrupt.c</FilePath>
+            </File>
+            <File>
+              <FileName>atomic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./kernel/atomic.c</FilePath>
+            </File>
+            <File>
+              <FileName>bitops.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./kernel/bitops.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -589,6 +599,16 @@
               <FileName>ofs.c</FileName>
               <FileType>1</FileType>
               <FilePath>./fs/ofs.c</FilePath>
+            </File>
+            <File>
+              <FileName>romfs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./fs/romfs.c</FilePath>
+            </File>
+            <File>
+              <FileName>inode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./fs/inode.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1160,6 +1180,16 @@
               <FileType>1</FileType>
               <FilePath>./kernel/interrupt.c</FilePath>
             </File>
+            <File>
+              <FileName>atomic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./kernel/atomic.c</FilePath>
+            </File>
+            <File>
+              <FileName>bitops.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./kernel/bitops.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1364,6 +1394,16 @@
               <FileName>ofs.c</FileName>
               <FileType>1</FileType>
               <FilePath>./fs/ofs.c</FilePath>
+            </File>
+            <File>
+              <FileName>romfs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./fs/romfs.c</FilePath>
+            </File>
+            <File>
+              <FileName>inode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./fs/inode.c</FilePath>
             </File>
           </Files>
         </Group>

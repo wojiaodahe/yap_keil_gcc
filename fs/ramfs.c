@@ -55,6 +55,7 @@ void ramfs_close(struct inode *inode, struct file *filp)
 
 }
 
+#if 0
 int ramfs_read(struct inode *inode, struct file *filp, char *buf, int len)
 {
     int ret;
@@ -68,19 +69,127 @@ int ramfs_read(struct inode *inode, struct file *filp, char *buf, int len)
 
     return ret;
 }
+#else
+int ramfs_read(struct inode *inode, struct file *filp, char *buf, int len)
+{
+    int ret;
+    char *buff;
+    int block_size;
+    int rw_block;
+    int nr_blocks = 0;
+    struct ramfs_inode *r_inode;
+
+    if (!len)
+        return len;
+    
+    if (!inode)
+        return -EINVAL;
+	
+    r_inode = inode->i_what;
+    block_size = SYSTEM_DEFAULT_SECTOR_SIZE;
+    
+    rw_block = filp->f_pos / block_size;
+
+    if ((filp->f_pos + len) > r_inode->size)
+        len = r_inode->size - filp->f_pos;
+
+    nr_blocks += len / block_size;
+    if (len % block_size)
+        nr_blocks++;
+#if 0 
+	if (filp->f_pos % block_size)
+        nr_blocks++;
+#else
+	if ((nr_blocks * block_size - (filp->f_pos % block_size)) < len)
+		nr_blocks++;
+#endif
+
+    buff = kmalloc(nr_blocks * block_size);
+#if 0
+    printk("\nfilp->f_pos: %d\n", filp->f_pos);
+    printk("len: %d\n", len);
+    printk("nr_blocks: %d\n", nr_blocks);
+    printk("rw_block: %d\n", rw_block);
+    printk("filp offset: %d\n", filp->f_pos % block_size);
+#endif
+    ret = block_read(inode, rw_block, buff, nr_blocks);
+    if (ret < 0)
+    {   
+        kfree(buff);
+        return ret;
+    }
+
+    memcpy(buf, buff + filp->f_pos % block_size, len);
+    kfree(buff);
+
+    filp->f_pos += len;
+
+    return len;
+}
+#endif
 
 int ramfs_write(struct inode *inode, struct file *filp, char *buf, int len)
 {
     int ret;
+    char *buff;
+    int block_size;
+    int rw_block;
+    int nr_blocks = 0;
+    struct ramfs_inode *r_inode;
 
-    ret = block_write(inode, filp->f_pos, buf, len);
+    if (!len)
+        return len;
+    
+    if (!inode)
+        return -EINVAL;
+	
+    r_inode = inode->i_what;
+    block_size = SYSTEM_DEFAULT_SECTOR_SIZE;
+    
+    rw_block = filp->f_pos / block_size;
 
+    if ((filp->f_pos + len) > r_inode->size)
+        len = r_inode->size - filp->f_pos;
+
+    nr_blocks += len / block_size;
+    if (len % block_size)
+        nr_blocks++;
+#if 0 
+	if (filp->f_pos % block_size)
+        nr_blocks++;
+#else
+	if ((nr_blocks * block_size - (filp->f_pos % block_size)) < len)
+		nr_blocks++;
+#endif
+
+    buff = kmalloc(nr_blocks * block_size);
+#if 0
+    printk("\nfilp->f_pos: %d\n", filp->f_pos);
+    printk("len: %d\n", len);
+    printk("nr_blocks: %d\n", nr_blocks);
+    printk("rw_block: %d\n", rw_block);
+    printk("filp offset: %d\n", filp->f_pos % block_size);
+#endif
+    ret = block_read(inode, rw_block, buff, 1);
     if (ret < 0)
+    {   
+        kfree(buff);
         return ret;
+    }
 
-    filp->f_pos += ret;
+    memcpy(buff +  filp->f_pos % block_size, buf, len);
+    ret = block_write(inode, rw_block, buff, nr_blocks);
+    if (ret < 0)
+    {   
+        kfree(buff);
+        return ret;
+    }
 
-    return ret;
+    kfree(buff);
+
+    filp->f_pos += len;
+
+    return len;
 }
 
 struct ramfs_inode *ramfs_travel_child(struct ramfs_inode *parent,   char *name, int namelen)
@@ -90,12 +199,6 @@ struct ramfs_inode *ramfs_travel_child(struct ramfs_inode *parent,   char *name,
         return NULL;
     
     child = parent->child;
-
-    if (!child)
-        return NULL;
-        
-    if (strncmp(child->name, name, namelen) == 0)
-            return child;
 
     while (child != NULL)
     {
@@ -163,10 +266,12 @@ int ramfs_create(struct inode *dir, char *name, int namelen, int mode, struct in
     child = kmalloc(sizeof (struct ramfs_inode));
     if (!child)
         return -1;
+    memset(child, 0, sizeof (*child));
 
     inode = kmalloc(sizeof (struct inode));
     if (!inode)
         return -1;
+    memset(inode, 0, sizeof (*inode));
 
     memcpy(child->name, name, namelen);
    
@@ -179,6 +284,7 @@ int ramfs_create(struct inode *dir, char *name, int namelen, int mode, struct in
 	*res_inode = inode;
 
     child->start_addr = kmalloc(RAMFS_DEFAULT_FILE_LEN);
+    memset(child->start_addr, 0, RAMFS_DEFAULT_FILE_LEN);
     child->size = RAMFS_DEFAULT_FILE_LEN;
 
     return ramfs_add_node(parent, child);
@@ -204,10 +310,12 @@ int ramfs_mkdir(struct inode *dir,   char *name, int namelen, int mode)
     child = kmalloc(sizeof (struct ramfs_inode));
     if (!child)
         return -1;
+    memset(child, 0, sizeof(*child));
 
     inode = kmalloc(sizeof (struct inode));
     if (!inode)
         return -1;
+    memset(inode, 0, sizeof (*inode));
 
     memcpy(child->name, name, namelen);
    
@@ -249,6 +357,7 @@ int ramfs_mknod(struct inode *dir,   char *name, int namelen, int mode, int dev_
     child = kmalloc(sizeof (struct ramfs_inode));
     if (!child)
         return -ENOSPC;
+    memset(child, 0, sizeof(*child));
     memcpy(child->name, name, namelen);
 
     inode = kmalloc(sizeof (struct inode));
@@ -257,6 +366,7 @@ int ramfs_mknod(struct inode *dir,   char *name, int namelen, int mode, int dev_
         kfree(child);
         return -ENOSPC;
     }
+    memset(inode, 0, sizeof (*inode));
 	inode->i_mode = mode;
 	inode->i_op = NULL;
 	inode->i_dev = dev_num;
@@ -279,6 +389,7 @@ struct super_block *ramfs_read_super(struct super_block *sb)
     inode = kmalloc(sizeof (struct inode));
     if (!inode)
         return NULL;
+    memset(inode, 0, sizeof (*inode));
     
     ramfs_inode = kmalloc(sizeof (struct ramfs_inode));
     if (!ramfs_inode)
@@ -286,15 +397,16 @@ struct super_block *ramfs_read_super(struct super_block *sb)
         kfree(inode);
         return NULL;
     }
+    memset(ramfs_inode, 0, sizeof (*ramfs_inode));
 
-    sb->s_mounted = inode;
-    sb->s_type = FILE_SYSTEM_TYPE_RAMFS;
-    
     inode->i_dev = sb->s_dev;
 
     inode->i_op = &ramfs_inode_operations;
 	inode->i_what = ramfs_inode;
     ramfs_inode->inode = inode;
+    
+    sb->s_mounted = inode;
+    sb->s_type = FILE_SYSTEM_TYPE_RAMFS;
 
     return sb;
 }

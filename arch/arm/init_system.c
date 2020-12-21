@@ -261,12 +261,13 @@ int s3c24xx_timer_init(void)
 
 int init_system(void)
 {
+	    create_page_table();
+    start_mmu();
+	
     disable_watch_dog();
   
     init_clock();
-    create_page_table();
-    start_mmu();
-	
+
     //init_memory();
 
     return 0;

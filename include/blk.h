@@ -18,7 +18,7 @@ struct request
 	unsigned long nr_sectors;
 	unsigned long current_nr_sectors;
     struct inode *inode;
-	char * buffer;
+	char  *buffer;
 //	struct task_struct * waiting;
 //	struct buffer_head * bh;
 //	struct buffer_head * bhtail;
@@ -44,8 +44,8 @@ struct blk_dev_struct
 extern int register_blkdev(unsigned int major, char * name, struct file_operations *fops);
 extern struct file_operations *get_blkfops(unsigned int major);
 extern int register_blk_request(int dev, int (*req)(struct request*));
-extern int block_read(struct inode *inode, unsigned int pos, char *buf, int count);
-extern int block_write(struct inode * inode, unsigned int pos, char * buf, int count);
+extern int block_read(struct inode *inode, unsigned long pos, char *buf, int count);
+extern int block_write(struct inode * inode, unsigned long pos, char * buf, int count);
 extern int register_get_disk_info_fun(dev_t major, get_disk_info get_info);
 #endif
 

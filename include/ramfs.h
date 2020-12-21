@@ -2,7 +2,7 @@
 #define __RAMFS_H__
 
 #define RAMFS_NAME_LEN          16
-#define RAMFS_DEFAULT_FILE_LEN  512
+#define RAMFS_DEFAULT_FILE_LEN  4096
 
 struct ramfs_inode
 {

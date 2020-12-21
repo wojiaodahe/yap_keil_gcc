@@ -19,8 +19,6 @@ struct ofs_super_block
     unsigned int first_ofs_inode_offset;
 };
 
-#define FILE_SYSTEM_TYPE_OFS  2
-
 extern struct super_block *ofs_read_super(struct super_block *sb);
 #endif
 

@@ -25,7 +25,7 @@ static void __netif_schedule(struct net_device *ndev)
     if (list_empty(&ndev->tx_queue))
         return;
 
-    if (test_bit(__QUEUE_STATE_XOFF, ndev->state))
+    if (test_bit(__QUEUE_STATE_XOFF, &ndev->state))
         return;
 
     list = ndev->tx_queue.next;
@@ -66,7 +66,7 @@ void netif_wake_queue(struct net_device *ndev)
 int netif_tx_queue(struct net_device *ndev, struct sk_buff *skb)
 {
     /**/
-    if (test_bit(__QUEUE_STATE_XOFF, ndev->state))
+    if (test_bit(__QUEUE_STATE_XOFF, &ndev->state))
         list_add_tail(&skb->list, &ndev->tx_queue);
     else
         return ndev->hard_start_xmit(skb, ndev);

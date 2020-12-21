@@ -1,6 +1,11 @@
 #ifndef __FS_H__
 #define __FS_H__
 
+#include "mm.h"
+#include "page.h"
+#include "list.h"
+#include "atomic.h"
+
 #define O_RDONLY	    00
 #define O_WRONLY	    01
 #define O_RDWR		    02
@@ -13,6 +18,26 @@
 
 #define FILE_SYSTEM_TYPE_RAMFS      1
 
+
+struct inode;
+struct super_block;
+
+
+typedef int(*find_inode_t)(struct inode * inode, unsigned long ino, void *arg);
+struct super_operations 
+{
+	void (*read_inode) (struct inode *);
+	void (*write_inode) (struct inode *, int);
+	void (*put_inode) (struct inode *);
+	void (*delete_inode) (struct inode *);
+	void (*put_super) (struct super_block *);
+	void (*write_super) (struct super_block *);
+	///int (*statfs) (struct super_block *, struct statfs *);
+	int (*remount_fs) (struct super_block *, int *, char *);
+	void (*clear_inode) (struct inode *);
+	void (*umount_begin) (struct super_block *);
+};
+
 struct super_block
 {
 
@@ -23,6 +48,10 @@ struct super_block
     unsigned int  s_type;
     int start_block;
     void *sb_data;
+
+	struct super_operations *s_op;
+
+	struct list_head inode_list;
 };
 
 
@@ -46,6 +75,7 @@ struct inode
 {
 	int 		            i_dev;
 	unsigned long	        i_ino;
+	unsigned long			i_size;
 	struct inode_operations *i_op;
 	struct super_block      *i_sb;
 	struct inode            *i_next;
@@ -53,10 +83,12 @@ struct inode
 	struct inode            *i_mount;
     unsigned int            i_mode;
     unsigned int            i_rdev;
-	unsigned short          i_count;
+	struct atomic 	        i_count;
 	unsigned short          i_flags;
 	unsigned int 			i_socket;
     void                    *i_what;
+
+	struct list_head 		i_list;
 };
 
 struct file 
@@ -125,11 +157,44 @@ struct inode_operations
 #define NR_OPEN    	16
 #define NR_FILEP	32
 
+
+struct address_space;
+struct address_space_operations {
+	int (*writepage)(struct page *);
+	int (*readpage)(struct file *, struct page *);
+	int (*sync_page)(struct page *);
+	int (*prepare_write)(struct file *, struct page *, unsigned, unsigned);
+	int (*commit_write)(struct file *, struct page *, unsigned, unsigned);
+	/* Unfortunately this kludge is needed for FIBMAP. Don't use it */
+	int (*bmap)(struct address_space *, long);
+};
+
+struct address_space
+{
+    struct list_head clean_pages;
+    struct list_head dirty_pages;
+    struct list_head locked_pages;
+    unsigned long nrpages;
+    struct address_space_operations *a_ops;
+    struct inode *host;
+    struct vm_area_struct *i_mmap;
+    struct vm_area_struct *i_mmap_shared;
+
+    spinlock_t i_shared_lock;
+
+};
+
+#define SYSTEM_DEFAULT_SECTOR_SIZE		512
+
+#define FILE_SYSTEM_TYPE_OFS  2
+#define FILE_SYSTEM_TYPE_ROMFS  3
+
+
+extern struct inode *iget(struct super_block *sb, unsigned long ino, find_inode_t find_actor, void *arg);
+
 extern int sys_mknod(char * filename, int mode, unsigned int dev);
 extern int sys_read(unsigned int fd, char *buf, unsigned int count);
 extern int sys_write(unsigned int fd, char *buf, unsigned int count);
 extern int sys_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg);
 
 #endif
-
-

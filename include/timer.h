@@ -1,6 +1,10 @@
-#ifndef INCLUDE_TIMER_H_
-#define INCLUDE_TIMER_H_
+#ifndef __KERNEL_TIMER_H__
+#define __KERNEL_TIMER_H__
+
+
 #include "list.h"
+
+extern unsigned long volatile jiffies;
 
 struct timer_list
 {

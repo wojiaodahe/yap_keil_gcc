@@ -40,7 +40,7 @@ int open_namei(char *pathname, int flag, int mode, struct inode **res_inode, str
         return 0;
     }
 
-    dir->i_count++;
+    atomic_inc(&dir->i_count);
     
     if (flag & O_CREAT)
     {
@@ -52,7 +52,7 @@ int open_namei(char *pathname, int flag, int mode, struct inode **res_inode, str
         }
         else
         {
-            dir->i_count++;
+            atomic_inc(&dir->i_count);
             ret = dir->i_op->create(dir, basename, namelen, mode, res_inode);
             return ret;
         }
@@ -65,7 +65,7 @@ int open_namei(char *pathname, int flag, int mode, struct inode **res_inode, str
             ret = -EROFS;
         else
         {
-            dir->i_count++;
+            atomic_inc(&dir->i_count);
             ret = dir->i_op->create(dir, basename, namelen, mode, res_inode);
             return ret;
         }
@@ -80,10 +80,14 @@ int open_namei(char *pathname, int flag, int mode, struct inode **res_inode, str
     return ret;
 }
 
+extern struct super_block *ramfs_read_super(struct super_block *sb);
+extern struct super_block *ofs_read_super(struct super_block *sb);
+extern struct super_block *romfs_read_super(struct super_block *sb);
 static struct file_system_type file_systems[] =
 {
-	{ramfs_read_super,	"ramfsfs", 1},
-    {ofs_read_super,    "ofs",     3},
+	{ramfs_read_super,	"ramfs", 1},
+	{romfs_read_super,	"romfs", 3},
+    //{ofs_read_super,    "ofs",     3},
 	{NULL,			NULL,		0}
 };
 
@@ -117,7 +121,8 @@ struct super_block *read_super(unsigned int dev, char *name, int flags, void *da
     if (sb)
         return sb;
     
-	if (!(fstype = get_fs_type(name)))
+    fstype = get_fs_type(name);
+	if (!fstype)
     {
         printk("VFS: get_fs_type");
         return NULL;
@@ -129,6 +134,7 @@ struct super_block *read_super(unsigned int dev, char *name, int flags, void *da
 
     sb->s_dev = dev;
     sb->s_flags = flags;
+    INIT_LIST_HEAD(&sb->inode_list);
     
     if (!(fstype->read_super(sb)))
     {
@@ -164,7 +170,7 @@ int lookup(struct inode *dir, char *name, int len, struct inode **result)
             dir = sb->s_covered;
             if (!dir)
                 return -ENOENT;
-            dir->i_count++;
+            atomic_inc(&dir->i_count);
         }
     }
     if (!dir->i_op || !dir->i_op->lookup)
@@ -193,13 +199,13 @@ int dir_namei(char *pathname, int *namelen, char **name, struct inode *base, str
     if (!base)
     {
         base = current->pwd;
-        base->i_count++;
+        atomic_inc(&base->i_count);
     }
     if ((c = *pathname) == '/')
     {
         base = current->root;
         pathname++;
-        base->i_count++;
+        atomic_inc(&base->i_count);
     }
 
     while (1)
@@ -219,7 +225,7 @@ int dir_namei(char *pathname, int *namelen, char **name, struct inode *base, str
         base = inode;
         if (base->i_mount)
             base = base->i_mount;
-        base->i_count++;
+        atomic_inc(&base->i_count);
     }
     if (!base->i_op || !base->i_op->lookup)
         return -ENOTDIR;
@@ -243,12 +249,12 @@ int _namei(char *pathname, struct inode *base, struct inode **res_inode)
     if (ret)
         return ret;
 
-    base->i_count++;
+    atomic_inc(&base->i_count);
     ret = lookup(base, basename, namelen, &inode);
     if (ret)
         return ret;
 
-    inode->i_count++;
+    atomic_inc(&inode->i_count);
     *res_inode = inode;
     
     return 0;
@@ -273,7 +279,7 @@ int do_mount(unsigned int dev, char *dir, char *type, int flags)
     if (ret)
         return ret;
 
-    if (dir_i->i_count != 1 || dir_i->i_mount)
+    if (atomic_read(&dir_i->i_count) != 1 || dir_i->i_mount)
         return -EBUSY;
 
     if (!S_ISDIR(dir_i->i_mode))
@@ -293,30 +299,26 @@ int do_mount(unsigned int dev, char *dir, char *type, int flags)
 
 void mount_root()
 {
-    struct file_system_type *fstype;
     struct super_block *sb;
     struct inode *inode;
 
-    for (fstype = file_systems; fstype->read_super; fstype++)
+    ROOT_DEV = 1;
+    sb = read_super(ROOT_DEV, "ramfs", 0, NULL);
+    if (sb)
     {
-        sb = read_super(ROOT_DEV, fstype->name, 0, NULL);
-        if (sb)
-        {
-            inode = sb->s_mounted;
-            inode->i_count += 3;
-            sb->s_covered= inode;
-            sb->s_flags = 0;
-            current->root = inode;
-            current->pwd = inode;
-            return;
-        }
+        inode = sb->s_mounted;
+        atomic_add(3, &inode->i_count);
+        sb->s_covered = inode;
+        sb->s_flags = 0;
+        current->root = inode;
+        current->pwd = inode;
+        return;
     }
 
     printk("VFS; Unable to mount root\n");
     while (1)
         ;
 }
-
 int sys_mount(char *dev_name, char *dir_name, char *type, unsigned long flags, void *data)
 {
    struct inode *inode;

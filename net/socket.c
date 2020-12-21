@@ -287,7 +287,7 @@ static int sock_alloc_fd(struct socket *sock)
 	file->f_count = 1;
 	file->f_inode = inode;
 	if (inode) 
-		inode->i_count++;
+		atomic_inc(&inode->i_count);
 	file->f_pos = 0;
 	
 	return fd;

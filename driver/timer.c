@@ -3,6 +3,8 @@
 #include "error.h"
 #include "interrupt.h"
 
+unsigned long volatile jiffies;
+
 static struct list_head timer_list_head;
 int add_timer(struct timer_list *timer)
 {

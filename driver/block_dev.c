@@ -6,7 +6,6 @@
 #include "common.h"
 #include "lib.h"
 
-#define SYSTEM_DEFAULT_SECTOR_SIZE		512
 
 //static struct blk_dev_struct *blk_devs_head;
 
@@ -81,7 +80,7 @@ int register_get_disk_info_fun(dev_t major, get_disk_info get_info)
 	return 0;
 }
 
-int block_read(struct inode *inode, unsigned int pos, char *buf, int count)
+int block_read(struct inode *inode, unsigned long pos, char *buf, int count)
 {
     int ret;
     struct request *req;
@@ -98,12 +97,14 @@ int block_read(struct inode *inode, unsigned int pos, char *buf, int count)
     blk_dev = find_blk_dev(inode->i_dev);
     if (!blk_dev)
         return -EINVAL;
+
 	if (!blk_dev->get_disk_info)
 		return -ENODEV;
     
     req = kmalloc(sizeof (struct request));
 	if (!req)
 		return -ENOMEM;
+    
 	info = kmalloc(sizeof (struct disk_info));
 	if (!info)
 	{
@@ -138,7 +139,7 @@ int block_read(struct inode *inode, unsigned int pos, char *buf, int count)
     req->cmd = REQUEST_READ;
     ret = blk_dev->request_fn(req);
 
-	memcpy(buf, tmp_buff + (SYSTEM_DEFAULT_SECTOR_SIZE * pos % info->sector_size), count * SYSTEM_DEFAULT_SECTOR_SIZE);
+	memcpy(buf, tmp_buff + (SYSTEM_DEFAULT_SECTOR_SIZE * pos) % info->sector_size, total_size);
 
 	kfree(tmp_buff);
 	kfree(info);
@@ -147,29 +148,72 @@ int block_read(struct inode *inode, unsigned int pos, char *buf, int count)
     return ret;
 }
 
-int block_write(struct inode * inode, unsigned int pos, char * buf, int count)
+int block_write(struct inode * inode, unsigned long pos, char * buf, int count)
 {
     int ret;
     struct request *req;
     struct blk_dev_struct *blk_dev;
-    
+	struct disk_info *info;
+	char *tmp_buff;
+
+	unsigned int total_size;
+	unsigned rw_sectors;
+
     if (!inode)
         return -EINVAL;
 
     blk_dev = find_blk_dev(inode->i_dev);
     if (!blk_dev)
         return -EINVAL;
-
+	if (!blk_dev->get_disk_info)
+		return -ENODEV;
+    
     req = kmalloc(sizeof (struct request));
+	if (!req)
+		return -ENOMEM;
+    memset(req, 0, sizeof (*req));
+	info = kmalloc(sizeof (struct disk_info));
+	if (!info)
+	{
+		kfree(req);
+		return -ENOMEM;
+	}
+    memset(info, 0, sizeof (*info));
 
-    req->sector = pos;
-    req->nr_sectors = count;
-    req->buffer = buf;
+	blk_dev->get_disk_info(info);
+
+	total_size = count * SYSTEM_DEFAULT_SECTOR_SIZE;
+	rw_sectors = total_size / info->sector_size;
+	if (total_size % info->sector_size)
+		rw_sectors += 1;
+#if 1
+	if ((rw_sectors * info->sector_size - (pos * SYSTEM_DEFAULT_SECTOR_SIZE) % info->sector_size) < total_size)
+		rw_sectors += 1;
+#else
+	
+#endif
+	tmp_buff = kmalloc(rw_sectors * info->sector_size);
+	if (!tmp_buff)
+	{
+		kfree(info);
+		kfree(req);
+		return -ENOMEM;
+	}
+
+	memcpy(tmp_buff, buf, count * SYSTEM_DEFAULT_SECTOR_SIZE);
+ 
+    req->sector = pos * SYSTEM_DEFAULT_SECTOR_SIZE / info->sector_size;
+    req->nr_sectors = rw_sectors;
+    req->buffer = tmp_buff;
     req->inode = inode;
     req->cmd = REQUEST_WRITE;
     ret = blk_dev->request_fn(req);
-
+	
+    kfree(tmp_buff);
+	kfree(info);
     kfree(req);
+    
+    return ret;
     
 	return ret;
 }

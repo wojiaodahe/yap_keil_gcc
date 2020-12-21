@@ -9,6 +9,8 @@
 #define RAMDISK_SIZE    (1024 *1024 *2)
 #define RAMDISK_DEV_NUM     1
 extern int ROOT_DEV;
+#define RAMDISK_SECTOR_SIZE 512
+
 extern struct inode_operations ramfs_inode_operations;
 
 int ramdisk_do_request(struct request *req)
@@ -30,19 +32,20 @@ int ramdisk_do_request(struct request *req)
     if (!start)
         return 0;
     
-    start += req->sector;    
+    start += req->sector * RAMDISK_SECTOR_SIZE;    
     if (start >= ramfs_inode->start_addr + ramfs_inode->size)
         return 0;
 
-    if ((start + req->nr_sectors) > (ramfs_inode->start_addr + ramfs_inode->size))
+    if ((start + req->nr_sectors * RAMDISK_SECTOR_SIZE) > (ramfs_inode->start_addr + ramfs_inode->size))
         size = ramfs_inode->start_addr + ramfs_inode->size - start;
     else
-        size = req->nr_sectors;
+        size = req->nr_sectors * RAMDISK_SECTOR_SIZE;
     
     if (req->cmd == REQUEST_READ)
         memcpy(req->buffer, start, size);
     else
         memcpy(start, req->buffer, size);
+
     return size;
 }
 
@@ -51,7 +54,7 @@ int ramdisk_get_disk_info(struct disk_info *info)
 	if (!info)
 		return -EINVAL;
 	
-	info->sector_size = 512;
+	info->sector_size = RAMDISK_SECTOR_SIZE;
 	return 0;
 }
 
