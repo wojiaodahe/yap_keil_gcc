@@ -1,4 +1,5 @@
-
+#include "lib.h"
+#include "printk.h"
 #include "page.h"
 #include "sched.h"
 #include "mm.h"
@@ -678,7 +679,7 @@ void exit_mmap(struct mm_struct *mm)
 
     /* This is just debugging */
     if (mm->map_count)
-        printf("exit_mmap: map count is %d\n", mm->map_count);
+        printk("exit_mmap: map count is %d\n", mm->map_count);
 
     clear_page_tables(mm, FIRST_USER_PGD_NR, USER_PTRS_PER_PGD);
 }
@@ -696,7 +697,7 @@ void show_pte(pte_t *pte)
     {
         if (pte_val(*pte))
         {
-            printf("i: %d pte: %p pte->pte: %lx\n", i, pte, pte->pte);
+            printk("i: %d pte: %p pte->pte: %lx\n", i, pte, pte->pte);
         }
         pte++; 
     }
@@ -713,7 +714,7 @@ void show_pmd(pmd_t *pmd)
     {
         if (pte_val(*pte))
         {
-            printf("pte%d: %p pte->pte: %lx\n", i, pte, pte->pte);
+            printk("pte%d: %p pte->pte: %lx\n", i, pte, pte->pte);
         }
         pte++;
     }
@@ -730,7 +731,7 @@ void show_pgd(pgd_t *pgd)
     {
         if (pmd_val(*pmd))
         {
-            printf("pmd%d: %p pmd->pmd: %lx\n", i, pmd, pmd->pmd);
+            printk("pmd%d: %p pmd->pmd: %lx\n", i, pmd, pmd->pmd);
             show_pmd(pmd);
         }
         pmd++;
@@ -745,16 +746,16 @@ void show_mm(struct mm_struct *mm)
     {
         vma = mm->mmap;
 
-        printf("\nmm: %p\n", mm);
-        printf("mm->mmap: %p\n", mm->mmap);
-        printf("mm->def_flags: %lx\n", mm->def_flags);
-        printf("mm->pgd: %p\n", mm->pgd);
+        printk("\nmm: %p\n", mm);
+        printk("mm->mmap: %p\n", mm->mmap);
+        printk("mm->def_flags: %lx\n", mm->def_flags);
+        printk("mm->pgd: %p\n", mm->pgd);
         show_pgd(mm->pgd);
 
         while (vma)
         {
-            printf("vma->start: %lx\n", vma->vm_start);
-            printf("vma->end: %lx\n", vma->vm_end);
+            printk("vma->start: %lx\n", vma->vm_start);
+            printk("vma->end: %lx\n", vma->vm_end);
             vma = vma->vm_next;
         }
     }

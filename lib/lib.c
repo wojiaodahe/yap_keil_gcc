@@ -57,3 +57,28 @@ int strcmp(char *s1, char *s2)
     }
     return (*s1 - *s2);
 }
+
+char *strcpy(char *dst, char *src)
+{
+    char *ret = dst;
+
+    while ((*dst++ = *src++) != '\0')
+        ;
+
+    return ret;
+}
+
+char *strncpy(char *dest, const char *src, int len)
+{
+    int i = 0;
+    char *temp = dest;
+
+    while (i++ < len && (*temp++ = *src++) != '\0')
+    {
+    }
+
+    if (*(temp) != '\0')
+        *temp = '\0';
+
+    return dest;
+}

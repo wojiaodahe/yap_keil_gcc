@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <string.h>
+#include "printk.h"
+#include "lib.h"
 
 #include "ptrace.h"
 #include "prosser.h"
@@ -84,7 +84,7 @@ void mmput(struct mm_struct *mm)
     }
 #endif
 
-    printf("BUG: %s \n", __func__);
+    printk("BUG: %s \n", __func__);
 }
 
 void proc_caches_init(void)
@@ -115,19 +115,19 @@ void proc_caches_init(void)
                                        sizeof(struct vm_area_struct), 0,
                                        SLAB_HWCACHE_ALIGN, NULL, NULL);
     if (!vm_area_cachep)
-        printf("vma_init: Cannot alloc vm_area_struct SLAB cache");
+        printk("vma_init: Cannot alloc vm_area_struct SLAB cache");
 
     mm_cachep = kmem_cache_create("mm_struct",
                                   sizeof(struct mm_struct), 0,
                                   SLAB_HWCACHE_ALIGN, NULL, NULL);
     if (!mm_cachep)
-        printf("vma_init: Cannot alloc mm_struct SLAB cache");
+        printk("vma_init: Cannot alloc mm_struct SLAB cache");
 
     init_mm.pgd = (pgd_t *)__get_free_pages(GFP_KERNEL, 0);
     pmd = pmd_alloc(init_mm.pgd, 0);
     pte = pte_alloc(pmd, 0);
 
-    printf("init_mm.pgd: %p init_mm.pmd: %p init_mm.pte: %p\n", init_mm.pgd, pmd, pte);
+    printk("init_mm.pgd: %p init_mm.pmd: %p init_mm.pte: %p\n", init_mm.pgd, pmd, pte);
 }
 
 int dup_mmap(struct mm_struct *mm)

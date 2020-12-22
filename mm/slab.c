@@ -4,6 +4,8 @@
 #include "bug.h"
 #include "slab.h"
 #include "interrupt.h"
+#include "printk.h"
+#include "lib.h"
 
 void *kmem_getpages(kmem_cache_t *cachep, unsigned long flags)
 {
@@ -505,11 +507,11 @@ kmem_cache_t *kmem_find_general_cachep(unsigned size, int gfpflags)
     return (gfpflags & GFP_DMA) ? csizep->cs_dmacachep : csizep->cs_cachep;
 }
 
-kmem_cache_t *kmem_cache_create(const char *name, unsigned int size, unsigned int offset,
+kmem_cache_t *kmem_cache_create(char *name, unsigned int size, unsigned int offset,
                                 unsigned long flags, void (*ctor)(void *, kmem_cache_t *, unsigned long),
                                 void (*dtor)(void *, kmem_cache_t *, unsigned long))
 {
-    const char *func_nm = "KERNEL ERR kmem_create: ";
+    char *func_nm = "KERNEL ERR kmem_create: ";
     unsigned int left_over, align, slab_size;
     kmem_cache_t *cachep = NULL;
 
@@ -546,7 +548,7 @@ kmem_cache_t *kmem_cache_create(const char *name, unsigned int size, unsigned in
     {
         size += (BYTES_PER_WORD - 1);
         size &= ~(BYTES_PER_WORD - 1);
-        printf("%sForcing size word alignment - %s\n", func_nm, name);
+        printk("%sForcing size word alignment - %s\n", func_nm, name);
     }
 
     align = BYTES_PER_WORD;
@@ -611,7 +613,7 @@ kmem_cache_t *kmem_cache_create(const char *name, unsigned int size, unsigned in
 
     if (!cachep->num)
     {
-        printf("kmem_cache_create: couldn't create cache %s.\n", name);
+        printk("kmem_cache_create: couldn't create cache %s.\n", name);
         kmem_cache_free(&cache_cache, cachep);
         cachep = NULL;
         goto opps;

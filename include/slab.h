@@ -178,7 +178,7 @@ typedef struct kmem_cache_s
 void *kmem_cache_alloc(kmem_cache_t *cachep, int flags);
 void kmem_cache_free(kmem_cache_t *cachep, void *objp);
 void kmem_freepages(kmem_cache_t *cachep, void *addr);
-kmem_cache_t *kmem_cache_create(const char *name, unsigned int size, unsigned int offset,
+kmem_cache_t *kmem_cache_create(char *name, unsigned int size, unsigned int offset,
                                 unsigned long flags, void (*ctor)(void *, kmem_cache_t *, unsigned long),
                                 void (*dtor)(void *, kmem_cache_t *, unsigned long));
 

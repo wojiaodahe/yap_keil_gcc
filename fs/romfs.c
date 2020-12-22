@@ -1,7 +1,5 @@
-#include "malloc.h"
-#include "stdio.h"
-#include "string.h"
-
+#include "lib.h"
+#include "printk.h"
 #include "blk.h"
 #include "fs.h"
 #include "error.h"
@@ -108,7 +106,7 @@ void romfs_read_inode(struct inode *i)
     {
         if (romfs_copyfrom(i, &ri, ino, ROMFH_SIZE) <= 0)
         {
-            printf("romfs: read error for inode 0x%x\n", ino);
+            printk("romfs: read error for inode 0x%x\n", ino);
             return;
         }
         /* XXX: do romfs_checksum here too (with name) */
@@ -153,7 +151,7 @@ int romfs_lookup(struct inode *dir, char *name, int name_len, struct inode **res
     int ret;
     unsigned int next;
    
-    buf = malloc(sizeof (struct romfs_inode));
+    buf = kmalloc(sizeof (struct romfs_inode));
     if (!buf)
         return -ENOMEM;
 
@@ -168,10 +166,10 @@ int romfs_lookup(struct inode *dir, char *name, int name_len, struct inode **res
         }
         romfs_inode = (struct romfs_inode *)(buf);
         
-        printf("file name: %s\n", romfs_inode->name);
-        printf("file spec: %d(0x%x)\n", ntohl(romfs_inode->spec), ntohl(romfs_inode->spec));
-        printf("file size: %d(0x%x)\n", ntohl(romfs_inode->size), ntohl(romfs_inode->size));
-        printf("file type: %d(0x%x)\n", next & 0xf, next & 0xf);
+        printk("file name: %s\n", romfs_inode->name);
+        printk("file spec: %d(0x%x)\n", ntohl(romfs_inode->spec), ntohl(romfs_inode->spec));
+        printk("file size: %d(0x%x)\n", ntohl(romfs_inode->size), ntohl(romfs_inode->size));
+        printk("file type: %d(0x%x)\n", next & 0xf, next & 0xf);
 
 
         if (strncmp(romfs_inode->name, name, name_len) == 0)
@@ -179,22 +177,22 @@ int romfs_lookup(struct inode *dir, char *name, int name_len, struct inode **res
 
         next = ntohl(romfs_inode->next);
         
-        printf("file next: %d(0x%x)\n", next, next);
+        printk("file next: %d(0x%x)\n", next, next);
         switch (next & 0x7)
         {
         case ROMFH_HRD:
-            printf("Hard Link");
+            printk("Hard Link");
             break;
         case ROMFH_DIR:
-            printf("Directory");
+            printk("Directory");
             break;
         case ROMFH_REG:
-            printf("Common");
+            printk("Common");
             break;
         default:
             break;
         }
-        printf("\n");
+        printk("\n");
         next = next & ~0xf;
     } while (next != 0x0a);
 
@@ -258,26 +256,26 @@ struct super_block *romfs_read_super(struct super_block *sb)
     struct romfs_inode *romfs_inode;
     struct romfs_super_block *romfs_sb;
 
-    inode = malloc(sizeof (struct inode));
+    inode = kmalloc(sizeof (struct inode));
     if (!inode)
         return NULL;
     
-    romfs_inode = malloc(sizeof (struct romfs_inode));
+    romfs_inode = kmalloc(sizeof (struct romfs_inode));
     if (!romfs_inode)
-        goto err_malloc_romfs_inode;
+        goto err_kmalloc_romfs_inode;
     
-    romfs_sb = malloc(sizeof (struct romfs_super_block));
+    romfs_sb = kmalloc(sizeof (struct romfs_super_block));
     if (!romfs_sb)
-        goto err_malloc_romfs_sb;
+        goto err_kmalloc_romfs_sb;
    
     inode->i_dev = sb->s_dev;
 
 //    disk_secotr_size = get_disk_sector_size();
 
     disk_secotr_size = 512;
-    buff = malloc(disk_secotr_size);
+    buff = kmalloc(disk_secotr_size);
     if (!buff)
-        goto err_malloc_buffer;
+        goto err_kmalloc_buffer;
 
     ret = romfs_copyfrom(inode, buff, 0, sizeof (struct romfs_super_block));
     if (ret < 0)
@@ -299,11 +297,11 @@ struct super_block *romfs_read_super(struct super_block *sb)
 
 err_block_read:
     free(buff);
-err_malloc_buffer:
+err_kmalloc_buffer:
     free(romfs_sb);
-err_malloc_romfs_sb:
+err_kmalloc_romfs_sb:
     free(romfs_inode);
-err_malloc_romfs_inode:
+err_kmalloc_romfs_inode:
     free(inode);
 
     return NULL;

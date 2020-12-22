@@ -1,4 +1,6 @@
 #include "mm.h"
+#include "lib.h"
+#include "printk.h"
 #include "page.h"
 #include "error.h"
 #include "sched.h"
@@ -30,9 +32,9 @@ int phy_mem_init(void)
     PHY_MEM_END = PHY_MEM_START + MEM_SIZE;
     PHY_ALLOC_START = PHY_MEM_START + MEM_MAP_SIZE + MEM_BIT_MAP_SIZE;
 
-    printf("PHY_MEM_START:      %lx\n", PHY_MEM_START);
-    printf("PHY_MEM_END:        %lx\n", PHY_MEM_END);
-    printf("PHY_ALLOC_START:    %lx\n", PHY_ALLOC_START);
+    printk("PHY_MEM_START:      %lx\n", PHY_MEM_START);
+    printk("PHY_MEM_END:        %lx\n", PHY_MEM_END);
+    printk("PHY_ALLOC_START:    %lx\n", PHY_ALLOC_START);
 
     return 0;
 }
@@ -474,7 +476,7 @@ static int do_wp_page(struct mm_struct *mm, struct vm_area_struct *vma, unsigned
 
 bad_wp_page:
     spin_unlock(&mm->page_table_lock);
-    printf("do_wp_page: bogus page at address %08lx (page 0x%lx)\n", address, (unsigned long)old_page);
+    printk("do_wp_page: bogus page at address %08lx (page 0x%lx)\n", address, (unsigned long)old_page);
     return -1;
 }
 

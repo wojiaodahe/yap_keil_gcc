@@ -1,5 +1,6 @@
-#include <stdio.h>
 
+#include "lib.h"
+#include "printk.h"
 #include "pgtable.h"
 #include "page.h"
 #include "mm.h"
@@ -15,7 +16,7 @@ pte_t *get_bad_pte_table(void)
 
 void __handle_bad_pmd(pmd_t *pmd)
 {
-    printf("%s Bad Pmd\n", __func__);
+    printk("%s Bad Pmd\n", __func__);
     //pmd_ERROR(*pmd);
     set_pmd(pmd, mk_user_pmd(get_bad_pte_table()));
 }

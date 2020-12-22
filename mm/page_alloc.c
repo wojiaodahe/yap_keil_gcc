@@ -2,9 +2,11 @@
 #include "swapctl.h"
 #include "common.h"
 #include "atomic.h"
+#include "printk.h"
 #include "mmzone.h"
 #include "swap.h"
 #include "page.h"
+#include "lib.h"
 #include "mm.h"
 
 #define memlist_init(x) INIT_LIST_HEAD(x)
@@ -271,11 +273,11 @@ void show_free_areas_core(pg_data_t *pgdat)
     unsigned long nr, total, flags;
 
 #if 0
-	printf("Free pages:      %6dkB (%6dkB HighMem)\n",
+	printk("Free pages:      %6dkB (%6dkB HighMem)\n",
 		nr_free_pages() << (PAGE_SHIFT-10),
 		nr_free_highpages() << (PAGE_SHIFT-10));
 
-	printf("( Active: %d, inactive_dirty: %d, inactive_clean: %d, free: %d (%d %d %d) )\n",
+	printk("( Active: %d, inactive_dirty: %d, inactive_clean: %d, free: %d (%d %d %d) )\n",
 		nr_active_pages,
 		nr_inactive_dirty_pages,
 		nr_inactive_clean_pages(),
@@ -307,14 +309,14 @@ void show_free_areas_core(pg_data_t *pgdat)
                     nr++;
                 }
                 total += nr * (1 << order);
-                printf("%lu*%lukB ", nr, (PAGE_SIZE >> 10) << order);
+                printk("%lu*%lukB ", nr, (PAGE_SIZE >> 10) << order);
             }
             spin_unlock_irqrestore(&zone->lock, flags);
         }
-        printf("= %lukB)\n", total * (PAGE_SIZE >> 10));
+        printk("= %lukB)\n", total * (PAGE_SIZE >> 10));
     }
     
-    //printf("total pages: %d\n", total);
+    //printk("total pages: %d\n", total);
 
 
 #ifdef SWAP_CACHE_INFO
@@ -438,7 +440,7 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
     }
 
     *gmap = pgdat->node_mem_map = lmem_map;
-    printf("mem_map: %p size: %lx\n", mem_map, map_size);
+    printk("mem_map: %p size: %lx\n", mem_map, map_size);
     pgdat->node_size = totalpages;
     pgdat->node_start_paddr = zone_start_paddr;
     pgdat->node_start_mapnr = (lmem_map - mem_map);
@@ -511,16 +513,16 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
         {
             page = mem_map + offset + i;
             if (i == 0)
-                printf("%s page: %p\n", __func__, page);
+                printk("%s page: %p\n", __func__, page);
             page->zone = zone;
             if (j != ZONE_HIGHMEM)
             {
                 page->virtual = (void *)__va(zone_start_paddr);
-                //printf("%p %x\n", page, page->virtual);
+                //printk("%p %x\n", page, page->virtual);
                 zone_start_paddr += PAGE_SIZE;
             }
         }
-        printf("%s page: %p\n", __func__, page);
+        printk("%s page: %p\n", __func__, page);
 
         offset += size;
         mask = -1;
@@ -535,7 +537,7 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
             bitmap_size = (bitmap_size + 7) >> 3;
             bitmap_size = LONG_ALIGN(bitmap_size);
             zone->free_area[i].map = (unsigned char *)alloc_bootmem_node(pgdat, bitmap_size);
-            printf("order: %ld map addr: %p size: %lx\n", i, zone->free_area[i].map, bitmap_size);
+            printk("order: %ld map addr: %p size: %lx\n", i, zone->free_area[i].map, bitmap_size);
         }
     }
 
