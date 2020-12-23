@@ -215,10 +215,10 @@ void init_clock(void)
     // LOCKTIME = 0x00ffffff;   // ???????
     CLKDIVN  = 0x05;            // FCLK:HCLK:PCLK=1:2:4, HDIVN=1,PDIVN=1
     
-    /* ??HDIVN?0,CPU????????“fast bus mode”??“asynchronous bus mode” */
+    /* ??HDIVN?0,CPU????????ï¿½fast bus modeï¿½??ï¿½asynchronous bus modeï¿½ */
 __asm__(
     "mrc    p15, 0, r1, c1, c0, 0\n"        /* ??????? */
-    "orr    r1, r1, #0xc0000000\n"          /* ???“asynchronous bus mode” */
+    "orr    r1, r1, #0xc0000000\n"          /* ???ï¿½asynchronous bus modeï¿½ */
     "mcr    p15, 0, r1, c1, c0, 0\n"        /* ??????? */
     :
     :
@@ -261,15 +261,14 @@ int s3c24xx_timer_init(void)
 
 int init_system(void)
 {
-	    create_page_table();
-    start_mmu();
-	
+
     disable_watch_dog();
-  
+
     init_clock();
+    create_page_table();
+    start_mmu();
 
     //init_memory();
 
     return 0;
 }
-
