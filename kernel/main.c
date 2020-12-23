@@ -327,6 +327,11 @@ extern int s3c24xx_init_tty(void);
 extern int test_platform(void);
 int kernel_main()
 {
+	phy_mem_init();
+	paging_init();
+	mem_init();
+	show_free_areas();
+
     init_key_irq();
 	
 	OS_Init();
