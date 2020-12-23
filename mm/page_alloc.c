@@ -4,6 +4,7 @@
 #include "atomic.h"
 #include "printk.h"
 #include "mmzone.h"
+#include "config.h"
 #include "swap.h"
 #include "page.h"
 #include "lib.h"
@@ -386,7 +387,7 @@ void *alloc_bootmem_node(pg_data_t *pgdat, unsigned long bitmap_size)
     static unsigned long offset = 0;
     char *p;
 
-    p = (char *)PHY_MEM_START + offset;
+    p = (char *)(get_page_table_offset() + offset);
 
     offset += bitmap_size;
 

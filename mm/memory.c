@@ -14,28 +14,9 @@ unsigned long max_mapnr;
 unsigned long num_physpages;
 
 
-unsigned long PHY_MEM_START;
-unsigned long PHY_MEM_END;
-unsigned long PHY_ALLOC_START;
-
-#define MEM_SIZE            0x10000000
-#define MEM_MAP_SIZE        0x200000
-#define MEM_BIT_MAP_SIZE    0x300000
 
 int phy_mem_init(void)
 {
-    void *ptr;
-
-    ptr = malloc(MEM_SIZE + PAGE_SIZE * 4);
-
-    PHY_MEM_START = (((unsigned long)(ptr)) & ~(PAGE_SIZE - 1)) + PAGE_SIZE;
-    PHY_MEM_END = PHY_MEM_START + MEM_SIZE;
-    PHY_ALLOC_START = PHY_MEM_START + MEM_MAP_SIZE + MEM_BIT_MAP_SIZE;
-
-    printk("PHY_MEM_START:      %lx\n", PHY_MEM_START);
-    printk("PHY_MEM_END:        %lx\n", PHY_MEM_END);
-    printk("PHY_ALLOC_START:    %lx\n", PHY_ALLOC_START);
-
     return 0;
 }
 
