@@ -245,9 +245,3 @@ int myprintf(char *fmt, ...)
 
 	return ret;
 }
-
-extern int vsprintf(int, int, int);
-void garbage()
-{
-	vsprintf(0, 0, 0);
-}

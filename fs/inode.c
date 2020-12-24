@@ -14,7 +14,7 @@ static void destroy_inode(struct inode *inode)
 
 static struct inode *alloc_inode()
 {
-    return (struct inode *)malloc(sizeof (struct inode));
+    return (struct inode *)kmalloc(sizeof (struct inode));
 }
 
 static void __iget(struct inode * inode)

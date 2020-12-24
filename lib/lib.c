@@ -82,3 +82,12 @@ char *strncpy(char *dest, const char *src, int len)
 
     return dest;
 }
+
+unsigned int strlen (const char * str)
+{      
+        const char *eos = str;
+ 
+        while( *eos++ ) ;
+ 
+        return( eos - str - 1 );
+}

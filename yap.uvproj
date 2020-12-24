@@ -291,7 +291,7 @@
             <BSSAddressRange></BSSAddressRange>
             <IncludeLibs></IncludeLibs>
             <IncludeDir></IncludeDir>
-            <Misc>-lc -lgcc -nostdlib -Ttext 30000000</Misc>
+            <Misc>-nostdlib -Ttext 30000000</Misc>
             <ScatterFile>./yap.lds</ScatterFile>
           </LDarm>
         </TargetArm>
@@ -525,6 +525,11 @@
               <FileType>1</FileType>
               <FilePath>./arch/arm/traps.c</FilePath>
             </File>
+            <File>
+              <FileName>2440slib.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>./arch/arm/2440slib.s</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -699,11 +704,6 @@
               <FileName>kmalloc.c</FileName>
               <FileType>1</FileType>
               <FilePath>./mm/kmalloc.c</FilePath>
-            </File>
-            <File>
-              <FileName>mm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>./mm/mm.c</FilePath>
             </File>
             <File>
               <FileName>filemap.c</FileName>
@@ -1435,6 +1435,11 @@
               <FileType>1</FileType>
               <FilePath>./arch/arm/traps.c</FilePath>
             </File>
+            <File>
+              <FileName>2440slib.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>./arch/arm/2440slib.s</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1609,11 +1614,6 @@
               <FileName>kmalloc.c</FileName>
               <FileType>1</FileType>
               <FilePath>./mm/kmalloc.c</FilePath>
-            </File>
-            <File>
-              <FileName>mm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>./mm/mm.c</FilePath>
             </File>
             <File>
               <FileName>filemap.c</FileName>

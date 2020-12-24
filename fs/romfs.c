@@ -161,7 +161,7 @@ int romfs_lookup(struct inode *dir, char *name, int name_len, struct inode **res
         ret = romfs_copyfrom(dir, buf, next, sizeof (struct romfs_inode));
         if (ret < 0)
         {
-            free(buf);
+            kfree(buf);
             return ret;
         }
         romfs_inode = (struct romfs_inode *)(buf);
@@ -198,14 +198,14 @@ int romfs_lookup(struct inode *dir, char *name, int name_len, struct inode **res
 
     if (next == 0x0a)
     {
-        free(buf);
+        kfree(buf);
         return -ENOENT;
     }
 
     inode = iget(dir->i_sb, next, NULL, NULL);
     if (!inode)
     {
-        free(buf);
+        kfree(buf);
         return -ENOMEM;
     }
 
@@ -291,18 +291,18 @@ struct super_block *romfs_read_super(struct super_block *sb)
     sb->s_type = FILE_SYSTEM_TYPE_ROMFS;
     sb->s_mounted = inode;
     sb->sb_data = romfs_sb;
-    free(buff);
+    kfree(buff);
     
     return sb;
 
 err_block_read:
-    free(buff);
+    kfree(buff);
 err_kmalloc_buffer:
-    free(romfs_sb);
+    kfree(romfs_sb);
 err_kmalloc_romfs_sb:
-    free(romfs_inode);
+    kfree(romfs_inode);
 err_kmalloc_romfs_inode:
-    free(inode);
+    kfree(inode);
 
     return NULL;
 }

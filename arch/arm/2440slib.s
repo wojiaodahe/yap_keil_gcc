@@ -1,349 +1,274 @@
-;=====================================================================
-; File Name : 2440slib.s
-; Function  : TQ2440  (Assembly)
-; Revision  : 1.0
-;=====================================================================
 
-;Interrupt, FIQ/IRQ disable
-NOINT  EQU 0xc0    ; 1100 0000
+#define ALIGN        .align 4,0x90
+#define CONFIG_AEABI
 
-;Check if tasm.exe(armasm -16 ...@ADS 1.0) is used.
-   GBLL    THUMBCODE
-   [ {CONFIG} = 16
-THUMBCODE SETL  {TRUE}
-	 CODE32
-   |
-THUMBCODE SETL  {FALSE}
-   ]
+.global __aeabi_idiv
+.global __aeabi_idivmod
+.global __aeabi_uidiv
+.global __aeabi_uidivmod
 
-   MACRO
-     MOV_PC_LR
-     [ THUMBCODE
-       bx lr
-     |
-       mov pc,lr
-     ]
-   MEND
+.macro ARM_DIV_BODY dividend, divisor, result, curbit
 
-   AREA |C$$code|, CODE, READONLY
-   EXPORT	EnterCritical
-EnterCritical   
-	mrs	r1, cpsr
-	str	r1, [r0]
-	orr	r1, r1, #NOINT
-	msr	cpsr_cxsf, r1		
-	MOV_PC_LR
-;restore cpsr, r0 = address to restore cpsr	
-	EXPORT	ExitCritical
-ExitCritical
-	ldr	r1, [r0]
-	msr	cpsr_cxsf, r1	
-	MOV_PC_LR	
-;==============
-; CPSR I,F bit
-;==============
-;int SET_IF(void);
-;The return value is current CPSR.
-	EXPORT	SET_IF
-SET_IF
-    ;This function works only if the processor is in previliged mode.
-   mrs r0,cpsr
-   mov r1,r0
-   orr r1,r1,#NOINT
-   msr cpsr_cxsf,r1
-   MOV_PC_LR
+    @ Initially shift the divisor left 3 bits if possible,
+    @ set curbit accordingly.  This allows for curbit to be located
+    @ at the left end of each 4 bit nibbles in the division loop
+    @ to save one loop in most cases.
+    tst    \divisor, #0xe0000000
+    moveq    \divisor, \divisor, lsl #3
+    moveq    \curbit, #8
+    movne    \curbit, #1
 
-;void WR_IF(int cpsrValue);
-   EXPORT WR_IF
-WR_IF
-    ;This function works only if the processor is in previliged mode.
-   msr cpsr_cxsf,r0
-   MOV_PC_LR
+    @ Unless the divisor is very big, shift it up in multiples of
+    @ four bits, since this is the amount of unwinding in the main
+    @ division loop.  Continue shifting until the divisor is 
+    @ larger than the dividend.
+1:    cmp    \divisor, #0x10000000
+    cmplo    \divisor, \dividend
+    movlo    \divisor, \divisor, lsl #4
+    movlo    \curbit, \curbit, lsl #4
+    blo    1b
+
+    @ For very big divisors, we must shift it a bit at a time, or
+    @ we will be in danger of overflowing.
+1:    cmp    \divisor, #0x80000000
+    cmplo    \divisor, \dividend
+    movlo    \divisor, \divisor, lsl #1
+    movlo    \curbit, \curbit, lsl #1
+    blo    1b
+
+    mov    \result, #0
 
 
-;void CLR_IF(void);
-   EXPORT  CLR_IF
-CLR_IF
-    ;This function works only if the processor is in previliged mode.
-   mrs r0,cpsr
-   bic r0,r0,#NOINT
-   msr cpsr_cxsf,r0
-   MOV_PC_LR
-   
-   	EXPORT	outportw
-outportw	strh	r0, [r1]
-	MOV_PC_LR
+    @ Division loop
+1:    cmp    \dividend, \divisor
+    subhs    \dividend, \dividend, \divisor
+    orrhs    \result,   \result,   \curbit
+    cmp    \dividend, \divisor,  lsr #1
+    subhs    \dividend, \dividend, \divisor, lsr #1
+    orrhs    \result,   \result,   \curbit,  lsr #1
+    cmp    \dividend, \divisor,  lsr #2
+    subhs    \dividend, \dividend, \divisor, lsr #2
+    orrhs    \result,   \result,   \curbit,  lsr #2
+    cmp    \dividend, \divisor,  lsr #3
+    subhs    \dividend, \dividend, \divisor, lsr #3
+    orrhs    \result,   \result,   \curbit,  lsr #3
+    cmp    \dividend, #0            @ Early termination?
+    movnes    \curbit,   \curbit,  lsr #4    @ No, any more bits to do?
+    movne    \divisor,  \divisor, lsr #4
+    bne    1b
 
-	EXPORT	inportw
-inportw	ldrh	r0, [r0]
-	MOV_PC_LR
+.endm
 
 
-;====================================
-; MMU Cache/TLB/etc on/off functions
-;====================================
-R1_I	EQU	(1<<12)
-R1_C	EQU	(1<<2)
-R1_A	EQU	(1<<1)
-R1_M    EQU	(1)
-R1_iA	EQU	(1<<31)
-R1_nF   EQU	(1<<30)
+.macro ARM_DIV2_ORDER divisor, order
 
-;void MMU_EnableICache(void)
-   EXPORT MMU_EnableICache
-MMU_EnableICache
-   mrc p15,0,r0,c1,c0,0
-   orr r0,r0,#R1_I
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
+    cmp    \divisor, #(1 << 16)
+    movhs    \divisor, \divisor, lsr #16
+    movhs    \order, #16
+    movlo    \order, #0
 
-;void MMU_DisableICache(void)
-   EXPORT MMU_DisableICache
-MMU_DisableICache
-   mrc p15,0,r0,c1,c0,0
-   bic r0,r0,#R1_I
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
+    cmp    \divisor, #(1 << 8)
+    movhs    \divisor, \divisor, lsr #8
+    addhs    \order, \order, #8
 
-;void MMU_EnableDCache(void)
-   EXPORT MMU_EnableDCache
-MMU_EnableDCache
-   mrc p15,0,r0,c1,c0,0
-   orr r0,r0,#R1_C
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
+    cmp    \divisor, #(1 << 4)
+    movhs    \divisor, \divisor, lsr #4
+    addhs    \order, \order, #4
 
-;void MMU_DisableDCache(void)
-   EXPORT MMU_DisableDCache
-MMU_DisableDCache
-   mrc p15,0,r0,c1,c0,0
-   bic r0,r0,#R1_C
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
+    cmp    \divisor, #(1 << 2)
+    addhi    \order, \order, #3
+    addls    \order, \order, \divisor, lsr #1
 
-;void MMU_EnableAlignFault(void)
-   EXPORT MMU_EnableAlignFault
-MMU_EnableAlignFault
-   mrc p15,0,r0,c1,c0,0
-   orr r0,r0,#R1_A
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
+.endm
 
-;void MMU_DisableAlignFault(void)
-   EXPORT MMU_DisableAlignFault
-MMU_DisableAlignFault
-   mrc p15,0,r0,c1,c0,0
-   bic r0,r0,#R1_A
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
 
-;void MMU_EnableMMU(void)
-   EXPORT MMU_EnableMMU
-MMU_EnableMMU
-   mrc p15,0,r0,c1,c0,0
-   orr r0,r0,#R1_M
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
+.macro ARM_MOD_BODY dividend, divisor, order, spare
 
-;void MMU_DisableMMU(void)
-   EXPORT MMU_DisableMMU
-MMU_DisableMMU
-   mrc p15,0,r0,c1,c0,0
-   bic r0,r0,#R1_M
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
+    mov    \order, #0
 
-;void MMU_SetFastBusMode(void)
-; FCLK:HCLK= 1:1
-  EXPORT MMU_SetFastBusMode
-MMU_SetFastBusMode
-   mrc p15,0,r0,c1,c0,0
-   bic r0,r0,#R1_iA:OR:R1_nF
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
+    @ Unless the divisor is very big, shift it up in multiples of
+    @ four bits, since this is the amount of unwinding in the main
+    @ division loop.  Continue shifting until the divisor is 
+    @ larger than the dividend.
+1:    cmp    \divisor, #0x10000000
+    cmplo    \divisor, \dividend
+    movlo    \divisor, \divisor, lsl #4
+    addlo    \order, \order, #4
+    blo    1b
 
-;void MMU_SetAsyncBusMode(void)
-; FCLK:HCLK= 1:2
-   EXPORT MMU_SetAsyncBusMode
-MMU_SetAsyncBusMode
-   mrc p15,0,r0,c1,c0,0
-   orr r0,r0,#R1_nF:OR:R1_iA
-   mcr p15,0,r0,c1,c0,0
-   MOV_PC_LR
+    @ For very big divisors, we must shift it a bit at a time, or
+    @ we will be in danger of overflowing.
+1:    cmp    \divisor, #0x80000000
+    cmplo    \divisor, \dividend
+    movlo    \divisor, \divisor, lsl #1
+    addlo    \order, \order, #1
+    blo    1b
 
-;=========================
-; Set TTBase
-;=========================
-;void MMU_SetTTBase(int base)
-   EXPORT MMU_SetTTBase
-MMU_SetTTBase
-   ;ro=TTBase
-   mcr p15,0,r0,c2,c0,0
-   MOV_PC_LR
 
-;=========================
-; Set Domain
-;=========================
-;void MMU_SetDomain(int domain)
-   EXPORT MMU_SetDomain
-MMU_SetDomain
-   ;ro=domain
-   mcr p15,0,r0,c3,c0,0
-   MOV_PC_LR
+    @ Perform all needed substractions to keep only the reminder.
+    @ Do comparisons in batch of 4 first.
+    subs    \order, \order, #3        @ yes, 3 is intended here
+    blt    2f
 
-;=========================
-; ICache/DCache functions
-;=========================
-;void MMU_InvalidateIDCache(void)
-   EXPORT MMU_InvalidateIDCache
-MMU_InvalidateIDCache
-   mcr p15,0,r0,c7,c7,0
-   MOV_PC_LR
+1:    cmp    \dividend, \divisor
+    subhs    \dividend, \dividend, \divisor
+    cmp    \dividend, \divisor,  lsr #1
+    subhs    \dividend, \dividend, \divisor, lsr #1
+    cmp    \dividend, \divisor,  lsr #2
+    subhs    \dividend, \dividend, \divisor, lsr #2
+    cmp    \dividend, \divisor,  lsr #3
+    subhs    \dividend, \dividend, \divisor, lsr #3
+    cmp    \dividend, #1
+    mov    \divisor, \divisor, lsr #4
+    subges    \order, \order, #4
+    bge    1b
 
-;void MMU_InvalidateICache(void)
-   EXPORT MMU_InvalidateICache
-MMU_InvalidateICache
-   mcr p15,0,r0,c7,c5,0
-   MOV_PC_LR
+    tst    \order, #3
+    teqne    \dividend, #0
+    beq    5f
 
-;void MMU_InvalidateICacheMVA(U32 mva)
-   EXPORT MMU_InvalidateICacheMVA
-MMU_InvalidateICacheMVA
-   ;r0=mva
-   mcr p15,0,r0,c7,c5,1
-   MOV_PC_LR
+    @ Either 1, 2 or 3 comparison/substractions are left.
+2:    cmn    \order, #2
+    blt    4f
+    beq    3f
+    cmp    \dividend, \divisor
+    subhs    \dividend, \dividend, \divisor
+    mov    \divisor,  \divisor,  lsr #1
+3:    cmp    \dividend, \divisor
+    subhs    \dividend, \dividend, \divisor
+    mov    \divisor,  \divisor,  lsr #1
+4:    cmp    \dividend, \divisor
+    subhs    \dividend, \dividend, \divisor
+5:
+.endm
 
-;void MMU_PrefetchICacheMVA(U32 mva)
-   EXPORT MMU_PrefetchICacheMVA
-MMU_PrefetchICacheMVA
-   ;r0=mva
-   mcr p15,0,r0,c7,c13,1
-   MOV_PC_LR
 
-;void MMU_InvalidateDCache(void)
-   EXPORT MMU_InvalidateDCache
-MMU_InvalidateDCache
-   mcr p15,0,r0,c7,c6,0
-   MOV_PC_LR
+__udivsi3:
+__aeabi_uidiv:
 
-;void MMU_InvalidateDCacheMVA(U32 mva)
-   EXPORT MMU_InvalidateDCacheMVA
-MMU_InvalidateDCacheMVA
-   ;r0=mva
-   mcr p15,0,r0,c7,c6,1
-   MOV_PC_LR
+    subs    r2, r1, #1
+    moveq    pc, lr
+    bcc    Ldiv0
+    cmp    r0, r1
+    bls    11f
+    tst    r1, r2
+    beq    12f
 
-;void MMU_CleanDCacheMVA(U32 mva)
-   EXPORT MMU_CleanDCacheMVA
-MMU_CleanDCacheMVA
-   ;r0=mva
-   mcr p15,0,r0,c7,c10,1
-   MOV_PC_LR
+    ARM_DIV_BODY r0, r1, r2, r3
 
-;void MMU_CleanInvalidateDCacheMVA(U32 mva)
-   EXPORT MMU_CleanInvalidateDCacheMVA
-MMU_CleanInvalidateDCacheMVA
-   ;r0=mva
-   mcr p15,0,r0,c7,c14,1
-   MOV_PC_LR
+    mov    r0, r2
+    mov    pc, lr
 
-;void MMU_CleanDCacheIndex(U32 index)
-   EXPORT MMU_CleanDCacheIndex
-MMU_CleanDCacheIndex
-   ;r0=index
-   mcr p15,0,r0,c7,c10,2
-   MOV_PC_LR
+11:    moveq    r0, #1
+    movne    r0, #0
+    mov    pc, lr
 
-;void MMU_CleanInvalidateDCacheIndex(U32 index)
-   EXPORT MMU_CleanInvalidateDCacheIndex
-MMU_CleanInvalidateDCacheIndex
-   ;r0=index
-   mcr p15,0,r0,c7,c14,2
-   MOV_PC_LR
+12:    ARM_DIV2_ORDER r1, r2
 
-;void MMU_WaitForInterrupt(void)
-   EXPORT MMU_WaitForInterrupt
-MMU_WaitForInterrupt
-   mcr p15,0,r0,c7,c0,4
-   MOV_PC_LR
+    mov    r0, r0, lsr r2
+    mov    pc, lr
 
-;===============
-; TLB functions
-;===============
-;voic MMU_InvalidateTLB(void)
-   EXPORT MMU_InvalidateTLB
-MMU_InvalidateTLB
-   mcr p15,0,r0,c8,c7,0
-   MOV_PC_LR
 
-;void MMU_InvalidateITLB(void)
-   EXPORT MMU_InvalidateITLB
-MMU_InvalidateITLB
-   mcr p15,0,r0,c8,c5,0
-   MOV_PC_LR
+__umodsi3:
 
-;void MMU_InvalidateITLBMVA(U32 mva)
-   EXPORT MMU_InvalidateITLBMVA
-MMU_InvalidateITLBMVA
-   ;ro=mva
-   mcr p15,0,r0,c8,c5,1
-   MOV_PC_LR
+    subs    r2, r1, #1            @ compare divisor with 1
+    bcc    Ldiv0
+    cmpne    r0, r1                @ compare dividend with divisor
+    moveq   r0, #0
+    tsthi    r1, r2                @ see if divisor is power of 2
+    andeq    r0, r0, r2
+    movls    pc, lr
 
-;void MMU_InvalidateDTLB(void)
-	EXPORT MMU_InvalidateDTLB
-MMU_InvalidateDTLB
-	mcr p15,0,r0,c8,c6,0
-	MOV_PC_LR
+    ARM_MOD_BODY r0, r1, r2, r3
 
-;void MMU_InvalidateDTLBMVA(U32 mva)
-	EXPORT MMU_InvalidateDTLBMVA
-MMU_InvalidateDTLBMVA
-	;r0=mva
-	mcr p15,0,r0,c8,c6,1
-	MOV_PC_LR
+    mov    pc, lr
 
-;=================
-; Cache lock down
-;=================
-;void MMU_SetDCacheLockdownBase(U32 base)
-   EXPORT MMU_SetDCacheLockdownBase
-MMU_SetDCacheLockdownBase
-   ;r0= victim & lockdown base
-   mcr p15,0,r0,c9,c0,0
-   MOV_PC_LR
 
-;void MMU_SetICacheLockdownBase(U32 base)
-   EXPORT MMU_SetICacheLockdownBase
-MMU_SetICacheLockdownBase
-   ;r0= victim & lockdown base
-   mcr p15,0,r0,c9,c0,1
-   MOV_PC_LR
+__divsi3:
+__aeabi_idiv:
 
-;=================
-; TLB lock down
-;=================
-;void MMU_SetDTLBLockdown(U32 baseVictim)
-   EXPORT MMU_SetDTLBLockdown
-MMU_SetDTLBLockdown
-   ;r0= baseVictim
-   mcr p15,0,r0,c10,c0,0
-   MOV_PC_LR
+    cmp    r1, #0
+    eor    ip, r0, r1            @ save the sign of the result.
+    beq    Ldiv0
+    rsbmi    r1, r1, #0            @ loops below use unsigned.
+    subs    r2, r1, #1            @ division by 1 or -1 ?
+    beq    10f
+    movs    r3, r0
+    rsbmi    r3, r0, #0            @ positive dividend value
+    cmp    r3, r1
+    bls    11f
+    tst    r1, r2                @ divisor is power of 2 ?
+    beq    12f
 
-;void MMU_SetITLBLockdown(U32 baseVictim)
-   EXPORT MMU_SetITLBLockdown
-MMU_SetITLBLockdown
-   ;r0= baseVictim
-   mcr p15,0,r0,c10,c0,1
-   MOV_PC_LR
+    ARM_DIV_BODY r3, r1, r0, r2
 
-;============
-; Process ID
-;============
-;void MMU_SetProcessId(U32 pid)
-   EXPORT MMU_SetProcessId
-MMU_SetProcessId
-   ;r0= pid
-   mcr p15,0,r0,c13,c0,0
-   MOV_PC_LR
+    cmp    ip, #0
+    rsbmi    r0, r0, #0
+    mov    pc, lr
 
-   END
+10:    teq    ip, r0                @ same sign ?
+    rsbmi    r0, r0, #0
+    mov    pc, lr
+
+11:    movlo    r0, #0
+    moveq    r0, ip, asr #31
+    orreq    r0, r0, #1
+    mov    pc, lr
+
+12:    ARM_DIV2_ORDER r1, r2
+
+    cmp    ip, #0
+    mov    r0, r3, lsr r2
+    rsbmi    r0, r0, #0
+    mov    pc, lr
+
+
+__modsi3:
+
+    cmp    r1, #0
+    beq    Ldiv0
+    rsbmi    r1, r1, #0            @ loops below use unsigned.
+    movs    ip, r0                @ preserve sign of dividend
+    rsbmi    r0, r0, #0            @ if negative make positive
+    subs    r2, r1, #1            @ compare divisor with 1
+    cmpne    r0, r1                @ compare dividend with divisor
+    moveq    r0, #0
+    tsthi    r1, r2                @ see if divisor is power of 2
+    andeq    r0, r0, r2
+    bls    10f
+
+    ARM_MOD_BODY r0, r1, r2, r3
+
+10:    cmp    ip, #0
+    rsbmi    r0, r0, #0
+    mov    pc, lr
+
+#ifdef CONFIG_AEABI
+
+__aeabi_uidivmod:
+
+    stmfd    sp!, {r0, r1, ip, lr}
+    bl    __aeabi_uidiv
+    ldmfd    sp!, {r1, r2, ip, lr}
+    mul    r3, r0, r2
+    sub    r1, r1, r3
+    mov    pc, lr
+
+__aeabi_idivmod:
+
+    stmfd    sp!, {r0, r1, ip, lr}
+    bl    __aeabi_idiv
+    ldmfd    sp!, {r1, r2, ip, lr}
+    mul    r3, r0, r2
+    sub    r1, r1, r3
+    mov    pc, lr
+
+#endif
+
+Ldiv0:
+
+    str    lr, [sp, #-8]!
+    @ bl    __div0
+    mov    r0, #0            @ About as wrong as it could be.
+    ldr    pc, [sp], #8
+
