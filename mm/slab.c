@@ -783,13 +783,17 @@ void kmem_cache_sizes_init(void)
 
 void *kmalloc(unsigned int size, int flags)
 {
+    void *p = NULL;
     cache_sizes_t *csizep = cache_sizes;
 
     for (; csizep->cs_size; csizep++)
     {
         if (size > csizep->cs_size)
             continue;
-        return __kmem_cache_alloc(flags & GFP_DMA ? csizep->cs_dmacachep : csizep->cs_cachep, flags);
+        p =  __kmem_cache_alloc(flags & GFP_DMA ? csizep->cs_dmacachep : csizep->cs_cachep, flags);
+        if (p)
+            memset(p, 0, size);
+        return p;
     }
     BUG(); // too big size
     return NULL;
