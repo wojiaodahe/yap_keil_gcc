@@ -24,7 +24,7 @@ void reserve_bootmem_core(bootmem_data_t *bdata, unsigned long addr, unsigned lo
 	for (i = sidx; i < eidx; i++)
 	{
 		if (test_and_set_bit(i, bdata->node_bootmem_map))
-			printk("hm, page %08lx reserved twice.\n", i * PAGE_SIZE);
+			printk("hm, page %d reserved twice.\n", i * PAGE_SIZE);
 	}
 }
 

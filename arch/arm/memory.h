@@ -3,8 +3,13 @@
 
 #define PHYS_OFFSET	(0x30000000)
 
+#if 0
 #define __virt_to_phys(x)	((x) - PAGE_OFFSET + PHYS_OFFSET)
 #define __phys_to_virt(x)	((x) - PHYS_OFFSET + PAGE_OFFSET)
+#else
+#define __virt_to_phys(x)	(x)
+#define __phys_to_virt(x)	(x)
+#endif
 
 #define PHYS_PFN_OFFSET	    (PHYS_OFFSET >> PAGE_SHIFT)
 #define ARCH_PFN_OFFSET		PHYS_PFN_OFFSET

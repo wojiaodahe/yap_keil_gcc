@@ -15,6 +15,9 @@
 #include "timer.h"
 #include "completion.h"
 
+#include "mm.h"
+#include "page.h"
+
 int  test_get_ticks(void *p)
 {
 	int t;
@@ -327,10 +330,25 @@ extern int s3c24xx_init_tty(void);
 extern int test_platform(void);
 int kernel_main()
 {
+	struct page *page0;
 	phy_mem_init();
+	s3c24xx_init_tty();
 	paging_init();
-	mem_init();
+	mem_init(0x30000000, 0x34000000);
 	show_free_areas();
+
+	page0 = alloc_pages(0, 0);
+    printk("page %x\n", page0);
+    printk("page_to_pfn: %d\n", __page_to_pfn(page0));
+    printk("page_to_pfn << PAGE_SHIFT: %x\n", (__page_to_pfn(page0)) << PAGE_SHIFT);
+
+    void *addr =  page_address(page0);  
+    printk("addr: %p\n", addr);
+
+
+    kmem_cache_init();
+    kmem_cache_sizes_init();
+	addr = my_kmalloc(32, 0);
 
     init_key_irq();
 	

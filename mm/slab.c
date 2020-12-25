@@ -50,7 +50,8 @@ static inline slab_t *kmem_cache_slabmgmt(kmem_cache_t *cachep, void *objp, int 
     }
     slabp->inuse = 0;
     slabp->colouroff = colour_off;
-    slabp->s_mem = objp + colour_off;
+    slabp->s_mem = (void *)((char *)objp + colour_off);
+
 
     return slabp;
 }
@@ -709,4 +710,101 @@ void kmem_cache_init(void)
 
     cache_cache.colour = left_over / cache_cache.colour_off;
     cache_cache.colour_next = 0;
+}
+
+void kmem_cache_sizes_init(void)
+{
+    cache_sizes_t *sizes = cache_sizes;
+    char name[20];
+    /*
+	 * Fragmentation resistance on low memory - only use bigger
+	 * page orders on machines with more than 32MB of memory.
+	 */
+    if (num_physpages > (32 << 20) >> PAGE_SHIFT)
+        slab_break_gfp_order = BREAK_GFP_ORDER_HI;
+    do 
+    {
+        /* For performance, all the general caches are L1 aligned.
+		 * This should be particularly beneficial on SMP boxes, as it
+		 * eliminates "false sharing".
+		 * Note for systems short on memory removing the alignment will
+		 * allow tighter packing of the smaller caches. */
+        sprintk(name, "size-%d", sizes->cs_size);
+        if (!(sizes->cs_cachep = kmem_cache_create(name, sizes->cs_size, 0, SLAB_HWCACHE_ALIGN, NULL, NULL)))
+        {
+            BUG();
+        }
+
+        /* Inc off-slab bufctl limit until the ceiling is hit. */
+        if (!(OFF_SLAB(sizes->cs_cachep)))
+        {
+            offslab_limit = sizes->cs_size - sizeof(slab_t);
+            offslab_limit /= 2;
+        }
+#if 0
+        sprintk(name, "size-%d(DMA)", sizes->cs_size);
+        sizes->cs_dmacachep = kmem_cache_create(name, sizes->cs_size, 0, SLAB_CACHE_DMA | SLAB_HWCACHE_ALIGN, NULL, NULL);
+        if (!sizes->cs_dmacachep)
+            BUG();
+#endif
+        sizes++;
+    } while (sizes->cs_size);
+}
+
+#if DEBUG
+#define CHECK_NR(pg)                                           \
+    do                                                         \
+    {                                                          \
+        if (!VALID_PAGE(pg))                                   \
+        {                                                      \
+            printk(KERN_ERR "kfree: out of range ptr %lxh.\n", \
+                   (unsigned long)objp);                       \
+            BUG();                                             \
+        }                                                      \
+    } while (0)
+#define CHECK_PAGE(page)                              \
+    do                                                \
+    {                                                 \
+        CHECK_NR(page);                               \
+        if (!PageSlab(page))                          \
+        {                                             \
+            printk(KERN_ERR "kfree: bad ptr %lxh.\n", \
+                   (unsigned long)objp);              \
+            BUG();                                    \
+        }                                             \
+    } while (0)
+
+#else
+#define CHECK_PAGE(pg) \
+    do                 \
+    {                  \
+    } while (0)
+#endif
+
+void *my_kmalloc(unsigned int size, int flags)
+{
+    cache_sizes_t *csizep = cache_sizes;
+
+    for (; csizep->cs_size; csizep++)
+    {
+        if (size > csizep->cs_size)
+            continue;
+        return __kmem_cache_alloc(flags & GFP_DMA ? csizep->cs_dmacachep : csizep->cs_cachep, flags);
+    }
+    BUG(); // too big size
+    return NULL;
+}
+
+void my_kfree(const void *objp)
+{
+    kmem_cache_t *c;
+    unsigned long flags;
+
+    if (!objp)
+        return;
+    local_irq_save(flags);
+    CHECK_PAGE(virt_to_page(objp));
+    c = GET_PAGE_CACHE(virt_to_page(objp));
+    __kmem_cache_free(c, (void *)objp);
+    local_irq_restore(flags);
 }
