@@ -50,7 +50,7 @@ struct tcp_seg *alloc_tcp_seg(unsigned int len)
 {
     struct tcp_seg *seg;
 
-    seg = kmalloc(sizeof (struct tcp_seg) + len);
+    seg = kmalloc(sizeof (struct tcp_seg) + len, GFP_KERNEL);
     if (!seg)
         return NULL;
 
@@ -65,11 +65,11 @@ struct tcp_seg *alloc_tcp_seg(unsigned int len)
 {
     struct tcp_seg *seg;
 
-    seg = kmalloc(sizeof (struct tcp_seg));
+    seg = kmalloc(sizeof (struct tcp_seg), GFP_KERNEL);
     if (!seg)
         return NULL;
 
-    seg->data = kmalloc(len);
+    seg->data = kmalloc(len, GFP_KERNEL);
     if (!seg->data)
     {
         kfree(seg);

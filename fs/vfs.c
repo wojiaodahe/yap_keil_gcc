@@ -400,7 +400,7 @@ struct file *get_empty_filp()
 
 struct inode *get_empty_inode()
 {
-	return kmalloc(sizeof (struct inode));
+	return kmalloc(sizeof (struct inode), GFP_KERNEL);
 }
 
 int sys_open(char *name, unsigned int flag, int mode)

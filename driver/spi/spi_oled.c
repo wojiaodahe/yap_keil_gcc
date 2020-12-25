@@ -171,7 +171,7 @@ int spi_oled_probe(struct spi_device *dev)
     spi_oled_dev = dev;
     spi_oled_dc_pin = (long)dev->dev.platform_data;
 
-    ker_buf = kmalloc(4096);
+    ker_buf = kmalloc(4096, GFP_KERNEL);
     
     /* 注册一个 file_operations */
     ret = register_chrdev(major, "oled", &oled_ops);

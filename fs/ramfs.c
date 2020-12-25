@@ -104,7 +104,7 @@ int ramfs_read(struct inode *inode, struct file *filp, char *buf, int len)
 		nr_blocks++;
 #endif
 
-    buff = kmalloc(nr_blocks * block_size);
+    buff = kmalloc(nr_blocks * block_size, GFP_KERNEL);
 #if 0
     printk("\nfilp->f_pos: %d\n", filp->f_pos);
     printk("len: %d\n", len);
@@ -162,7 +162,7 @@ int ramfs_write(struct inode *inode, struct file *filp, char *buf, int len)
 		nr_blocks++;
 #endif
 
-    buff = kmalloc(nr_blocks * block_size);
+    buff = kmalloc(nr_blocks * block_size, GFP_KERNEL);
 #if 0
     printk("\nfilp->f_pos: %d\n", filp->f_pos);
     printk("len: %d\n", len);
@@ -263,12 +263,12 @@ int ramfs_create(struct inode *dir, char *name, int namelen, int mode, struct in
     if (child)
         return -1;
 
-    child = kmalloc(sizeof (struct ramfs_inode));
+    child = kmalloc(sizeof (struct ramfs_inode), GFP_KERNEL);
     if (!child)
         return -1;
     memset(child, 0, sizeof (*child));
 
-    inode = kmalloc(sizeof (struct inode));
+    inode = kmalloc(sizeof (struct inode), GFP_KERNEL);
     if (!inode)
         return -1;
     memset(inode, 0, sizeof (*inode));
@@ -283,7 +283,7 @@ int ramfs_create(struct inode *dir, char *name, int namelen, int mode, struct in
 
 	*res_inode = inode;
 
-    child->start_addr = kmalloc(RAMFS_DEFAULT_FILE_LEN);
+    child->start_addr = kmalloc(RAMFS_DEFAULT_FILE_LEN, GFP_KERNEL);
     memset(child->start_addr, 0, RAMFS_DEFAULT_FILE_LEN);
     child->size = RAMFS_DEFAULT_FILE_LEN;
 
@@ -307,12 +307,12 @@ int ramfs_mkdir(struct inode *dir,   char *name, int namelen, int mode)
     if (child)
         return -1;
 
-    child = kmalloc(sizeof (struct ramfs_inode));
+    child = kmalloc(sizeof (struct ramfs_inode), GFP_KERNEL);
     if (!child)
         return -1;
     memset(child, 0, sizeof(*child));
 
-    inode = kmalloc(sizeof (struct inode));
+    inode = kmalloc(sizeof (struct inode), GFP_KERNEL);
     if (!inode)
         return -1;
     memset(inode, 0, sizeof (*inode));
@@ -330,7 +330,7 @@ int ramfs_mkdir(struct inode *dir,   char *name, int namelen, int mode)
 
     inode->i_mode = mode;
 
-    child->start_addr = kmalloc(RAMFS_DEFAULT_FILE_LEN);
+    child->start_addr = kmalloc(RAMFS_DEFAULT_FILE_LEN, GFP_KERNEL);
     child->size = RAMFS_DEFAULT_FILE_LEN;
 
     return ramfs_add_node(parent, child);
@@ -354,13 +354,13 @@ int ramfs_mknod(struct inode *dir,   char *name, int namelen, int mode, int dev_
     if (child)
         return -EBUSY;
 
-    child = kmalloc(sizeof (struct ramfs_inode));
+    child = kmalloc(sizeof (struct ramfs_inode), GFP_KERNEL);
     if (!child)
         return -ENOSPC;
     memset(child, 0, sizeof(*child));
     memcpy(child->name, name, namelen);
 
-    inode = kmalloc(sizeof (struct inode));
+    inode = kmalloc(sizeof (struct inode), GFP_KERNEL);
     if (!inode)
     {
         kfree(child);
@@ -386,12 +386,12 @@ struct super_block *ramfs_read_super(struct super_block *sb)
     struct inode *inode;
     struct ramfs_inode *ramfs_inode;
 
-    inode = kmalloc(sizeof (struct inode));
+    inode = kmalloc(sizeof (struct inode), GFP_KERNEL);
     if (!inode)
         return NULL;
     memset(inode, 0, sizeof (*inode));
     
-    ramfs_inode = kmalloc(sizeof (struct ramfs_inode));
+    ramfs_inode = kmalloc(sizeof (struct ramfs_inode), GFP_KERNEL);
     if (!ramfs_inode)
     {
         kfree(inode);

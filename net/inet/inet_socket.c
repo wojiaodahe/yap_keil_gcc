@@ -14,7 +14,7 @@ static struct i_proto_opt *inet_protos[MAX_INET_PROTO];
 struct i_socket *alloc_isocket()
 {
 	struct i_socket *isk;
-	isk = kmalloc(sizeof (struct i_socket));
+	isk = kmalloc(sizeof (struct i_socket), GFP_KERNEL);
 
 	if (!isk)
 		return NULL;

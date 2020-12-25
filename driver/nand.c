@@ -361,7 +361,7 @@ int nand_do_request(struct request *req)
 	char *b = NULL;
 	char *tmp;
 
-	b = kmalloc(2048);
+	b = kmalloc(2048, GFP_KERNEL);
 	if (!b)
 		return -ENOMEM;
 

@@ -75,11 +75,11 @@ int led_probe(struct platform_device *pdev)
 	res_io = platform_get_resource(pdev, IORESOURCE_IO, 0);
 	printk("bit num: %x\n", res_io->start);
 
-	led = kmalloc(sizeof (struct led));
+	led = kmalloc(sizeof (struct led), GFP_KERNEL);
 	if (!led)
 		return -ENOMEM;
 
-	name = kmalloc(16);
+	name = kmalloc(16, GFP_KERNEL);
 	if (!name)
 	{
 		kfree(led);

@@ -1,14 +1,15 @@
 #ifndef __PCB_H__
 #define __PCB_H__
+
 #include "message.h"
 #include "fs.h"
 #include "config.h"
 #include "wait.h"
 
+#include "printk.h"
+
 #define disable_schedule(x)	enter_critical()
 #define enable_schedule(x)	exit_critical()
-
-extern void *kmalloc(unsigned int size);
 
 typedef enum 
 {
@@ -47,7 +48,7 @@ typedef struct pcb
 	unsigned long phyaddr;
 	unsigned long viraddr;
 
-	unsigned int authority;//进程权限（内核进程、用户进程）
+	unsigned int authority;//锟斤拷锟斤拷权锟睫ｏ拷锟节核斤拷锟教★拷锟矫伙拷锟斤拷锟教ｏ拷
 
 	int time_slice;
 	int ticks;

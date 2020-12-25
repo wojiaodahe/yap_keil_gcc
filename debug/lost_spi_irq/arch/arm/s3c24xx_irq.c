@@ -213,7 +213,7 @@ void s3c24xx_init_irq(void)
 
     for (irq_num = IRQ_EINT0; irq_num <= IRQ_EINT23; irq_num++)
     {
-        desc = kmalloc(sizeof (struct irq_desc));
+        desc = kmalloc(sizeof (struct irq_desc), GFP_KERNEL);
         if (!desc)
         {
             printk("%s failed!\n", __func__);

@@ -72,7 +72,7 @@ int test_tcp(void *p)
 
     new_fd = sys_accept(fd, (struct sockaddr *)&cliaddr, &addrlen);
     
-    buff = kmalloc(BUFF_SIZE);
+    buff = kmalloc(BUFF_SIZE, GFP_KERNEL);
     if (!buff)
     {
         printk("kmalloc failed\n");
@@ -348,7 +348,8 @@ int kernel_main()
 
     kmem_cache_init();
     kmem_cache_sizes_init();
-	addr = my_kmalloc(32, 0);
+	addr = kmalloc(32, GFP_KERNEL);
+	kfree(addr);
 
     init_key_irq();
 	

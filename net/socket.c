@@ -47,7 +47,7 @@ struct sk_buff *alloc_skbuff(unsigned short len)
 		if (SKB[i].use_flag == SKB_NO_USE)
 		{
             enter_critical();
-			SKB[i].data_buf = kmalloc(len);
+			SKB[i].data_buf = kmalloc(len, GFP_KERNEL);
 			if (!SKB[i].data_buf)
             {
                 exit_critical();
@@ -63,11 +63,11 @@ struct sk_buff *alloc_skbuff(unsigned short len)
 #else
 	struct sk_buff *skb;
 
-	sbk = kmalloc(sizeof (struct sk_buff));
+	sbk = kmalloc(sizeof (struct sk_buff), GFP_KERNEL);
 	if (!skb)
 		return NULL;
 
-	skb->data_buf = kmalloc(data_len);
+	skb->data_buf = kmalloc(data_len, GFP_KERNEL);
 	if (!skb->data_buf)
 	{
 		kfree(skb);

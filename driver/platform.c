@@ -85,7 +85,7 @@ struct platform_device *platform_alloc_device(char *name, int id)
 {
     struct platform_device *pdev = NULL;
 
-    pdev = kmalloc(sizeof (struct platform_device));
+    pdev = kmalloc(sizeof (struct platform_device), GFP_KERNEL);
     if (!pdev)
         return NULL;
 

@@ -54,7 +54,7 @@ int ofs_read(struct inode *inode, struct file *filp, char *buf, int len)
 		nr_blocks++;
 #endif
 
-    buff = kmalloc(nr_blocks * block_size);
+    buff = kmalloc(nr_blocks * block_size, GFP_KERNEL);
 #if 0
     printk("\nfilp->f_pos: %d\n", filp->f_pos);
     printk("len: %d\n", len);
@@ -108,7 +108,7 @@ int ofs_write(struct inode *inode, struct file *filp, char *buf, int len)
     if (filp->f_pos % block_size)
         nr_blocks++;
 
-    buff = kmalloc(nr_blocks * block_size);
+    buff = kmalloc(nr_blocks * block_size, GFP_KERNEL);
     
     printk("\nfilp->f_pos: %d\n", filp->f_pos);
     printk("len: %d\n", len);
@@ -195,18 +195,18 @@ struct super_block *ofs_read_super(struct super_block *sb)
     struct ofs_inode *ofs_inode;
     struct ofs_super_block *ofs_sb;
 
-    inode = kmalloc(sizeof (struct inode));
+    inode = kmalloc(sizeof (struct inode), GFP_KERNEL);
     if (!inode)
         return NULL;
     
-    ofs_inode = kmalloc(sizeof (struct ofs_inode));
+    ofs_inode = kmalloc(sizeof (struct ofs_inode), GFP_KERNEL);
     if (!ofs_inode)
     {
         kfree(inode);
         return NULL;
     }
     
-    ofs_sb = kmalloc(sizeof (struct ofs_super_block));
+    ofs_sb = kmalloc(sizeof (struct ofs_super_block), GFP_KERNEL);
     if (!ofs_sb)
     {
         kfree(inode);
@@ -219,7 +219,7 @@ struct super_block *ofs_read_super(struct super_block *sb)
 //    disk_secotr_size = get_disk_sector_size();
 
     disk_secotr_size = 512;
-    buff = kmalloc(disk_secotr_size);
+    buff = kmalloc(disk_secotr_size, GFP_KERNEL);
     if (!buff)
     {
         kfree(inode);

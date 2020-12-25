@@ -123,7 +123,7 @@ struct spi_device *spi_alloc_device(struct spi_master *master)
 //    if (!spi_master_get(master))
 //       return NULL;
 
-    spi = kmalloc(sizeof (struct spi_device));
+    spi = kmalloc(sizeof (struct spi_device), GFP_KERNEL);
     if (!spi)
     {
         printk("Cannot Alloc spi_device %s\n", __func__);
@@ -360,7 +360,7 @@ struct spi_master *spi_alloc_master(struct device *dev, unsigned int size)
 {
     struct spi_master *master = NULL;
 
-    master = kmalloc(size  + sizeof (*master));
+    master = kmalloc(size  + sizeof (*master), GFP_KERNEL);
     if (!master)
         return NULL;
 
@@ -425,7 +425,7 @@ int spi_register_board_info(struct spi_board_info *info, unsigned int n)
     struct spi_master *master;
     struct spi_board_info *bi;
 
-    bi = kmalloc(n * sizeof (struct spi_board_info));
+    bi = kmalloc(n * sizeof (struct spi_board_info), GFP_KERNEL);
     if (!bi)
         return -ENOMEM;
 

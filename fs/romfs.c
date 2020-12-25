@@ -151,7 +151,7 @@ int romfs_lookup(struct inode *dir, char *name, int name_len, struct inode **res
     int ret;
     unsigned int next;
    
-    buf = kmalloc(sizeof (struct romfs_inode));
+    buf = kmalloc(sizeof (struct romfs_inode), GFP_KERNEL);
     if (!buf)
         return -ENOMEM;
 
@@ -256,15 +256,15 @@ struct super_block *romfs_read_super(struct super_block *sb)
     struct romfs_inode *romfs_inode;
     struct romfs_super_block *romfs_sb;
 
-    inode = kmalloc(sizeof (struct inode));
+    inode = kmalloc(sizeof (struct inode), GFP_KERNEL);
     if (!inode)
         return NULL;
     
-    romfs_inode = kmalloc(sizeof (struct romfs_inode));
+    romfs_inode = kmalloc(sizeof (struct romfs_inode), GFP_KERNEL);
     if (!romfs_inode)
         goto err_kmalloc_romfs_inode;
     
-    romfs_sb = kmalloc(sizeof (struct romfs_super_block));
+    romfs_sb = kmalloc(sizeof (struct romfs_super_block), GFP_KERNEL);
     if (!romfs_sb)
         goto err_kmalloc_romfs_sb;
    
@@ -273,7 +273,7 @@ struct super_block *romfs_read_super(struct super_block *sb)
 //    disk_secotr_size = get_disk_sector_size();
 
     disk_secotr_size = 512;
-    buff = kmalloc(disk_secotr_size);
+    buff = kmalloc(disk_secotr_size, GFP_KERNEL);
     if (!buff)
         goto err_kmalloc_buffer;
 

@@ -6,16 +6,6 @@
 
 #include "list.h"
 
-void kfree(void *addr)
-{
-
-}
-
-void *kmalloc(unsigned int size)
-{
-    return NULL;
-}
-
 int system_mm_init(void)
 {
 	return 0;

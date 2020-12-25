@@ -781,7 +781,7 @@ void kmem_cache_sizes_init(void)
     } while (0)
 #endif
 
-void *my_kmalloc(unsigned int size, int flags)
+void *kmalloc(unsigned int size, int flags)
 {
     cache_sizes_t *csizep = cache_sizes;
 
@@ -795,7 +795,7 @@ void *my_kmalloc(unsigned int size, int flags)
     return NULL;
 }
 
-void my_kfree(const void *objp)
+void kfree(const void *objp)
 {
     kmem_cache_t *c;
     unsigned long flags;

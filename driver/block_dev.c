@@ -101,11 +101,11 @@ int block_read(struct inode *inode, unsigned long pos, char *buf, int count)
 	if (!blk_dev->get_disk_info)
 		return -ENODEV;
     
-    req = kmalloc(sizeof (struct request));
+    req = kmalloc(sizeof (struct request), GFP_KERNEL);
 	if (!req)
 		return -ENOMEM;
     
-	info = kmalloc(sizeof (struct disk_info));
+	info = kmalloc(sizeof (struct disk_info), GFP_KERNEL);
 	if (!info)
 	{
 		kfree(req);
@@ -124,7 +124,7 @@ int block_read(struct inode *inode, unsigned long pos, char *buf, int count)
 #else
 	
 #endif
-	tmp_buff = kmalloc(rw_sectors * info->sector_size);
+	tmp_buff = kmalloc(rw_sectors * info->sector_size, GFP_KERNEL);
 	if (!tmp_buff)
 	{
 		kfree(info);
@@ -168,11 +168,11 @@ int block_write(struct inode * inode, unsigned long pos, char * buf, int count)
 	if (!blk_dev->get_disk_info)
 		return -ENODEV;
     
-    req = kmalloc(sizeof (struct request));
+    req = kmalloc(sizeof (struct request), GFP_KERNEL);
 	if (!req)
 		return -ENOMEM;
     memset(req, 0, sizeof (*req));
-	info = kmalloc(sizeof (struct disk_info));
+	info = kmalloc(sizeof (struct disk_info), GFP_KERNEL);
 	if (!info)
 	{
 		kfree(req);
@@ -192,7 +192,7 @@ int block_write(struct inode * inode, unsigned long pos, char * buf, int count)
 #else
 	
 #endif
-	tmp_buff = kmalloc(rw_sectors * info->sector_size);
+	tmp_buff = kmalloc(rw_sectors * info->sector_size, GFP_KERNEL);
 	if (!tmp_buff)
 	{
 		kfree(info);
