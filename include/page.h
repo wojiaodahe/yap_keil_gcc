@@ -41,7 +41,11 @@ typedef struct pgprot
 #define pmd_val(x)              ((x).pmd)
 #define pgd_val(x)              ((x).pgd)
 #define pgprot_val(x)           ((x).pgprot)
+#if 0
 #define pte_page(x)             (mem_map + (unsigned long)((x).pte >> PAGE_SHIFT))
+#else
+#define pte_page(x)             virt_to_page ((x).pte)
+#endif
 
 #define __pte(x)                ((pte_t) { (x) } )
 #define __pmd(x)                ((pmd_t) { (x) } )

@@ -333,7 +333,7 @@ int kernel_main()
 	struct page *page0;
 
 
-	//phy_mem_init();
+	phy_mem_init();
 	s3c24xx_init_tty();
 	paging_init();
 	mem_init(0x30000000, 0x34000000);
@@ -341,6 +341,7 @@ int kernel_main()
     
 	kmem_cache_init();
     kmem_cache_sizes_init();
+    proc_caches_init();
 
 	//test_mm();
 	test_set_pgd();

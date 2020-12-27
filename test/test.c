@@ -114,8 +114,6 @@ void test_do_brk(void)
     current = &test_current;
     memset(current, 0, sizeof (*current));
 
-    proc_caches_init();
-    
     mm_test = mm_alloc();
    
     current->mm = mm_test;
