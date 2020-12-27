@@ -73,6 +73,7 @@ int vsprintk(char *buf, char *fmt, va_list vp)
     {
         if(*pfmt == '%')
         {
+try_again:
             switch(*(++pfmt))
             {
 
@@ -103,6 +104,19 @@ int vsprintk(char *buf, char *fmt, va_list vp)
                 vargint = va_arg(vp, int);
                 offset += hex2string(vargint, buf + offset);
                 break;
+            case 'p':
+                vargint = va_arg(vp, int);
+                offset += hex2string(vargint, buf + offset);
+                break;
+            case 'l':
+                offset++;
+                goto try_again;
+            case '#':
+                offset++;
+                *(buf + offset) = '0';
+                offset++;
+                *(buf + offset) = 'x';
+                goto try_again;
             case '%':
                 *(buf + offset) = '%';
                 offset++;

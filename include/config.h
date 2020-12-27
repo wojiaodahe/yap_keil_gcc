@@ -16,9 +16,9 @@
 #define TLB_BASE                		0x33a00000              
 
 #define IRQ_STACK				        0x33f00000
-#define FIQ_STACK				        0x33e00000
+#define SYS_STACK				        0x33e00000
 #define SVC_STACK				        0x33d00000
-#define SYS_STACK				        0x33c00000
+#define FIQ_STACK				        0x33c00000
 
 #define DEFAULT_KERNEL_SIZE             0x500000
 #define PAGE_TABLE_SIZE                 0x200000

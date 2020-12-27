@@ -2,19 +2,18 @@
 #include "fs.h"
 #include "kmalloc.h"
 #include "common.h"
-#include "pcb.h"
 #include "blk.h"
 #include "ramfs.h"
 #include "ofs.h"
 #include "proc.h"
 #include "lib.h"
+#include "sched.h"
 #include "printk.h"
 
 extern int nand_init(void);
 extern int ramdisk_init(void);
 extern int lookup(struct inode *dir, char *name, int len, struct inode **result);
 extern int dir_namei(char *pathname, int *namelen, char **name, struct inode *base, struct inode **res_inode);
-extern pcb_t *current;
 
 static struct file FILP[NR_FILEP];
 int ROOT_DEV = 0;

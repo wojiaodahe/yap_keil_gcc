@@ -1,7 +1,6 @@
 #include "proc.h"
-#include "pcb.h"
+#include "sched.h"
 
-extern pcb_t *current;
 
 inline void add_preempt_count(unsigned int val)
 {   

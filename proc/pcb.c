@@ -1,4 +1,4 @@
-#include "pcb.h"
+#include "sched.h"
 #include "config.h"
 #include "list.h"
 #include "printk.h"
@@ -9,9 +9,9 @@ typedef struct
 }stack_t;
 
 
-pcb_t 	task_pcb[MAX_TASK_NUM];
+struct task_struct 	task_pcb[MAX_TASK_NUM];
 stack_t	task_sp[MAX_TASK_NUM];
-pcb_t *alloc_pcb(void)
+struct task_struct *alloc_pcb(void)
 {
 	static unsigned int cur_pcb = 0;
 	
@@ -35,9 +35,9 @@ void *alloc_stack(void)
 }
 
 
-void pcb_list_add(pcb_t *head, pcb_t *pcb)
+void pcb_list_add(struct task_struct *head, struct task_struct *pcb)
 {
-	pcb_t *tmp = pcb;
+	struct task_struct *tmp = pcb;
 
     tmp->next = head->next;
     tmp->prev = head;
@@ -45,11 +45,11 @@ void pcb_list_add(pcb_t *head, pcb_t *pcb)
     head->next = tmp;
 }
 
-pcb_t *pcb_list_init(void)
+struct task_struct *pcb_list_init(void)
 {
-	pcb_t *tmp;
+	struct task_struct *tmp;
 
-    if ((tmp = (pcb_t *)alloc_pcb()) == (void *)0)
+    if ((tmp = (struct task_struct *)alloc_pcb()) == (void *)0)
     {
         printk("%s failed\n", __func__);
         panic();

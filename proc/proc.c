@@ -4,7 +4,7 @@
 #include "interrupt.h"
 #include "error.h"
 #include "config.h"
-#include "pcb.h"
+#include "sched.h"
 #include "proc.h"
 #include "wait.h"
 #include "timer.h"
@@ -14,17 +14,17 @@
 #include "syscall.h"
 #include "completion.h"
 
-extern void pcb_list_add(pcb_t *head, pcb_t *pcb);
-extern pcb_t * pcb_list_init(void);
+extern void pcb_list_add(struct task_struct *head, struct task_struct *pcb);
+extern struct task_struct * pcb_list_init(void);
 extern void __soft_schedule(void);
 extern void __int_schedule(void);
-extern pcb_t *alloc_pcb(void);
+extern struct task_struct *alloc_pcb(void);
 extern void *alloc_stack(void);
 
-pcb_t *next_run;
-pcb_t *current;
+struct task_struct *next_run;
+struct task_struct *current;
 static struct proc_list_head proc_list[PROCESS_PRIO_BUTT];
-static pcb_t sleep_proc_list_head;
+static struct task_struct sleep_proc_list_head;
 static unsigned int OS_TICKS = 0;
 static unsigned int pid = 0;
 unsigned char OS_RUNNING = 0;
@@ -76,7 +76,7 @@ int kernel_thread(int (*f)(void *), void *args)
     unsigned long flags;
 	unsigned int sp;
 	
-	pcb_t *pcb = (pcb_t *)alloc_pcb();
+	struct task_struct *pcb = (struct task_struct *)alloc_pcb();
 	if (!pcb)
 		return -ENOMEM;
 
@@ -121,7 +121,7 @@ int kernel_thread_prio(int (*f)(void *), void *args, unsigned int prio)
 {
 	unsigned int sp;
 	
-	pcb_t *pcb = (pcb_t *)alloc_pcb();
+	struct task_struct *pcb = (struct task_struct *)alloc_pcb();
 	if (!pcb)
 		return -ENOMEM;
 
@@ -155,10 +155,10 @@ int kernel_thread_prio(int (*f)(void *), void *args, unsigned int prio)
 	return 0;
 }
 
-pcb_t *OS_GetNextReady(void)
+struct task_struct *OS_GetNextReady(void)
 {
     int prio;
-    pcb_t *tmp;
+    struct task_struct *tmp;
     
     for (prio = 0; prio < PROCESS_PRIO_BUTT; prio++)
     {
@@ -169,7 +169,7 @@ pcb_t *OS_GetNextReady(void)
             tmp = tmp->next;
             if (tmp->pid == -1)
                 continue;
-            if (tmp->p_flags == PROCESS_READY)
+            if (tmp->flags == PROCESS_READY)
             {
                 proc_list[prio].current = tmp;
                 return tmp;
@@ -231,30 +231,30 @@ void __wake_up(wait_queue_t *wq)
 void prepare_to_wait(wait_queue_t *wq, unsigned int state)
 {
     wq->priv = current;
-    current->p_flags |= state;
+    current->flags |= state;
 }
 
 void finish_wait(wait_queue_t *wq)
 {
-    pcb_t *pcb;
+    struct task_struct *pcb;
 
     if (!wq || !wq->priv)
         return;
 
     pcb = wq->priv;
-    pcb->p_flags = PROCESS_READY;
+    pcb->flags = PROCESS_READY;
 }
 
 void __wake_up_interruptible(wait_queue_t *wq)
 {
 
-    pcb_t *pcb;
+    struct task_struct *pcb;
 
     if (!wq || !wq->priv)
         return;
 
     pcb = wq->priv;
-    pcb->p_flags = PROCESS_READY;
+    pcb->flags = PROCESS_READY;
 }
 
 void __init_waitqueue_head(wait_queue_t *wq, char *name)
@@ -414,7 +414,7 @@ int OS_IDLE_PROCESS(void *arg)
 
 void print_sleep_list(void)
 {
-    pcb_t *tmp;
+    struct task_struct *tmp;
 
     tmp = sleep_proc_list_head.next_sleep_proc;
 
@@ -439,7 +439,7 @@ void process_sleep(unsigned int sec)
 {
 	enter_critical();
 
-	current->p_flags |= PROCESS_SLEEP;
+	current->flags |= PROCESS_SLEEP;
 	current->sleep_time = sec * HZ;
 
     add_current_to_sleep_list();
@@ -452,7 +452,7 @@ void process_msleep(unsigned int m)
 {
 	enter_critical();
 
-	current->p_flags |= PROCESS_SLEEP;
+	current->flags |= PROCESS_SLEEP;
 	current->sleep_time = m * HZ / 1000;
 	if (!current->sleep_time)
 		current->sleep_time = 1;
@@ -465,11 +465,11 @@ void process_msleep(unsigned int m)
 
 void set_task_state(void *task, unsigned int state)
 {
-    pcb_t *tsk = task;
+    struct task_struct *tsk = task;
 
 	enter_critical();
 
-	tsk->p_flags = state;
+	tsk->flags = state;
 
 	exit_critical();
 }
@@ -483,14 +483,14 @@ void clr_task_status(unsigned int status)
 {
 	enter_critical();
 
-	current->p_flags &= ~(status);
+	current->flags &= ~(status);
 
 	exit_critical();
 }
 
 void update_sleeping_proc(void)
 {
-    pcb_t *tmp;
+    struct task_struct *tmp;
 	
     tmp = sleep_proc_list_head.next_sleep_proc;
 	while (tmp != &sleep_proc_list_head)
@@ -499,7 +499,7 @@ void update_sleeping_proc(void)
             tmp->sleep_time--;
         if (tmp->sleep_time == 0)
         {
-            tmp->p_flags &= ~(PROCESS_SLEEP);
+            tmp->flags &= ~(PROCESS_SLEEP);
             tmp->next_sleep_proc->prev_sleep_proc = tmp->prev_sleep_proc; 
             tmp->prev_sleep_proc->next_sleep_proc = tmp->next_sleep_proc;
         }
@@ -732,7 +732,7 @@ int OS_Init(void)
     return 0;
 }
 
-int proc2pid(pcb_t *proc)
+int proc2pid(struct task_struct *proc)
 {
 #if 0
     return proc->pid;
@@ -747,7 +747,7 @@ int proc2pid(pcb_t *proc)
 #endif
 }
 
-pcb_t *pid2proc(int pid)
+struct task_struct *pid2proc(int pid)
 {
 
     enter_critical();

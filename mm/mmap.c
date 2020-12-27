@@ -598,7 +598,10 @@ unsigned long sys_brk(unsigned long brk)
     //unsigned long rlim;
     unsigned long retval;
     unsigned long newbrk, oldbrk;
-    struct mm_struct *mm = current->mm;
+    struct mm_struct *mm;
+    
+    printk("%x %x\n", current, current->mm);
+    mm = current->mm;
 
     //down(&mm->mmap_sem);
 

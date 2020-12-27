@@ -4,7 +4,7 @@
 #include "fs.h"
 #include "common.h"
 #include "proc.h"
-#include "pcb.h"
+#include "sched.h"
 #include "printk.h"
 #include "lib.h"
 #include "kmalloc.h"
@@ -13,7 +13,6 @@ extern int inet_family_init(void);
 extern struct file *get_empty_filp(void);
 extern struct inode *get_empty_inode(void);
 
-extern struct pcb *current;
 static struct socket sockets[MAX_SOCKETS];
 static struct family_ops *family_ops[MAX_PROTO];
 

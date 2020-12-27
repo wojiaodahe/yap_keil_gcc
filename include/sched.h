@@ -7,6 +7,7 @@
 #include "atomic.h"
 #include "slab.h"
 #include "fs.h"
+#include "pcb.h"
 
 #define NR_OPEN_DEFAULT 32
 
@@ -16,7 +17,7 @@
 #define TASK_ZOMBIE		4
 #define TASK_STOPPED		8
 
-
+#if 0
 struct task_struct 
 {
     unsigned int pid;
@@ -47,6 +48,7 @@ struct task_struct
 
     unsigned long min_flt, maj_flt, nswap, cmin_flt, cmaj_flt, cnswap;
 };
+#endif
 
 extern struct task_struct *current;
 extern kmem_cache_t *sigact_cachep;

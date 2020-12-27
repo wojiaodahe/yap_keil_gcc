@@ -7,10 +7,10 @@
 #include "lib.h"
 #include "pcb.h"
 #include "proc.h"
+#include "sched.h"
 
 
 extern struct file *get_empty_filp(void);
-extern pcb_t *current;
 
 #if 0
 int sys_call_schedule(int swi_num, int argc, int *argv)

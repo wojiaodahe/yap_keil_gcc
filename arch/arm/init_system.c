@@ -200,6 +200,23 @@ __asm__(
         );
 }
 
+void stop_mmu(void)
+{
+   int r0;
+
+	__asm__(
+		"mrc    p15, 0, r0, c1, c0, 0\n"    /* 锟斤拷锟斤拷锟斤拷锟狡寄达拷锟斤拷锟斤拷值 */
+
+		                                /* .RVI ..RS B... .CAM */
+		"bic    r0, r0, #0x3000\n"          /* ..11 .... .... .... 锟斤拷锟絍锟斤拷I位 */
+		"bic    r0, r0, #0x0300\n"          /* .... ..11 .... .... 锟斤拷锟絉锟斤拷S位 */
+		"bic    r0, r0, #0x0087\n"          /* .... .... 1... .111 锟斤拷锟紹/C/A/M */
+		"bic    r0, r0, #0x0001\n"          /* .... .... .... ...1 锟斤拷止MMU */
+
+		"mcr    p15, 0, r0, c1, c0, 0\n"    /* 锟斤拷锟睫改碉拷值写锟斤拷锟斤拷萍拇锟斤拷锟� */		
+    );
+}
+
 /*
  * ??MPLLCON???,[19:12]?MDIV,[9:4]?PDIV,[1:0]?SDIV
  * ???????:
@@ -215,10 +232,10 @@ void init_clock(void)
     // LOCKTIME = 0x00ffffff;   // ???????
     CLKDIVN  = 0x05;            // FCLK:HCLK:PCLK=1:2:4, HDIVN=1,PDIVN=1
     
-    /* ??HDIVN?0,CPU????????�fast bus mode�??�asynchronous bus mode� */
+    /* ??HDIVN?0,CPU????????閿熺禎ast bus mode閿燂拷??閿熺禈synchronous bus mode閿燂拷 */
 __asm__(
     "mrc    p15, 0, r1, c1, c0, 0\n"        /* ??????? */
-    "orr    r1, r1, #0xc0000000\n"          /* ???�asynchronous bus mode� */
+    "orr    r1, r1, #0xc0000000\n"          /* ???閿熺禈synchronous bus mode閿燂拷 */
     "mcr    p15, 0, r1, c1, c0, 0\n"        /* ??????? */
     :
     :

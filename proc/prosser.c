@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-
 #include "prosser.h"
 
 #define ll_alloc_task_struct() ((struct task_struct *)__get_free_pages(GFP_KERNEL, 1))

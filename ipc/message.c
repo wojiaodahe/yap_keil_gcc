@@ -1,10 +1,10 @@
 #include "message.h"
-#include "pcb.h"
+#include "sched.h"
 #include "assert.h"
 #include "lib.h"
 
-extern pcb_t *pid2proc(int);
-extern int proc2pid(pcb_t *proc);
+extern struct task_struct *pid2proc(int);
+extern int proc2pid(struct task_struct *proc);
 extern int sendrec(int type, int src_dest, MESSAGE *msg);
 
 #define phys_copy memcpy
@@ -19,21 +19,21 @@ void reset_msg(MESSAGE* p)
 	memset(p, 0, sizeof(MESSAGE));
 }
 
-void block(pcb_t* p)
+void block(struct task_struct* p)
 {
     OS_Sched();
 }
 
-void unblock(pcb_t *p)
+void unblock(struct task_struct *p)
 {
 
 }
 
-int msg_send(pcb_t* current, int dest, MESSAGE* m)
+int msg_send(struct task_struct* current, int dest, MESSAGE* m)
 {
-	pcb_t * p;
-	pcb_t* sender = current;
-	pcb_t* p_dest; //= proc_table + dest; /* proc dest */
+	struct task_struct * p;
+	struct task_struct* sender = current;
+	struct task_struct* p_dest; //= proc_table + dest; /* proc dest */
 
     p_dest = pid2proc(dest);
 
@@ -44,7 +44,7 @@ int msg_send(pcb_t* current, int dest, MESSAGE* m)
 		//panic(">>DEADLOCK<< %s->%s", sender->name, p_dest->name);
 	}
 
-	if ((p_dest->p_flags & RECEIVING) && /* dest is waiting for the msg */
+	if ((p_dest->flags & RECEIVING) && /* dest is waiting for the msg */
 	    (p_dest->p_recvfrom == proc2pid(sender) ||
 	     p_dest->p_recvfrom == ANY)) {
 		assert(p_dest->p_msg);
@@ -54,22 +54,22 @@ int msg_send(pcb_t* current, int dest, MESSAGE* m)
 			  va2la(proc2pid(sender), m),
 			  sizeof(MESSAGE));
 		p_dest->p_msg = 0;
-		p_dest->p_flags &= ~RECEIVING; /* dest has received the msg */
+		p_dest->flags &= ~RECEIVING; /* dest has received the msg */
 		p_dest->p_recvfrom = NO_TASK;
 		unblock(p_dest);
 
-		assert(p_dest->p_flags == 0);
+		assert(p_dest->flags == 0);
 		assert(p_dest->p_msg == 0);
 		assert(p_dest->p_recvfrom == NO_TASK);
 		assert(p_dest->p_sendto == NO_TASK);
-		assert(sender->p_flags == 0);
+		assert(sender->flags == 0);
 		assert(sender->p_msg == 0);
 		assert(sender->p_recvfrom == NO_TASK);
 		assert(sender->p_sendto == NO_TASK);
 	}
 	else { /* dest is not waiting for the msg */
-		sender->p_flags |= SENDING;
-		assert(sender->p_flags == SENDING);
+		sender->flags |= SENDING;
+		assert(sender->flags == SENDING);
 		sender->p_sendto = dest;
 		sender->p_msg = m;
 
@@ -87,7 +87,7 @@ int msg_send(pcb_t* current, int dest, MESSAGE* m)
 
 		block(sender);
 
-		assert(sender->p_flags == SENDING);
+		assert(sender->flags == SENDING);
 		assert(sender->p_msg != 0);
 		assert(sender->p_recvfrom == NO_TASK);
 		assert(sender->p_sendto == dest);
@@ -96,17 +96,17 @@ int msg_send(pcb_t* current, int dest, MESSAGE* m)
 	return 0;
 }
 
-int msg_receive(pcb_t* current, int src, MESSAGE* m)
+int msg_receive(struct task_struct* current, int src, MESSAGE* m)
 {
-	pcb_t* p;
-	pcb_t* p_who_wanna_recv = current; /**
+	struct task_struct* p;
+	struct task_struct* p_who_wanna_recv = current; /**
 						  * This name is a little bit
 						  * wierd, but it makes me
 						  * think clearly, so I keep
 						  * it.
 						  */
-	pcb_t* p_from = 0; /* from which the message will be fetched */
-	pcb_t* prev = 0;
+	struct task_struct* p_from = 0; /* from which the message will be fetched */
+	struct task_struct* prev = 0;
 	int copyok = 0;
 
 	assert(proc2pid(p_who_wanna_recv) != src);
@@ -127,7 +127,7 @@ int msg_receive(pcb_t* current, int src, MESSAGE* m)
 
 		p_who_wanna_recv->has_int_msg = 0;
 
-		assert(p_who_wanna_recv->p_flags == 0);
+		assert(p_who_wanna_recv->flags == 0);
 		assert(p_who_wanna_recv->p_msg == 0);
 		assert(p_who_wanna_recv->p_sendto == NO_TASK);
 		assert(p_who_wanna_recv->has_int_msg == 0);
@@ -146,12 +146,12 @@ int msg_receive(pcb_t* current, int src, MESSAGE* m)
 			p_from = p_who_wanna_recv->q_sending;
 			copyok = 1;
 
-			assert(p_who_wanna_recv->p_flags == 0);
+			assert(p_who_wanna_recv->flags == 0);
 			assert(p_who_wanna_recv->p_msg == 0);
 			assert(p_who_wanna_recv->p_recvfrom == NO_TASK);
 			assert(p_who_wanna_recv->p_sendto == NO_TASK);
 			assert(p_who_wanna_recv->q_sending != 0);
-			assert(p_from->p_flags == SENDING);
+			assert(p_from->flags == SENDING);
 			assert(p_from->p_msg != 0);
 			assert(p_from->p_recvfrom == NO_TASK);
 			assert(p_from->p_sendto == proc2pid(p_who_wanna_recv));
@@ -163,7 +163,7 @@ int msg_receive(pcb_t* current, int src, MESSAGE* m)
 		 */
 		p_from = pid2proc(src);//&proc_table[src];
 
-		if ((p_from->p_flags & SENDING) &&
+		if ((p_from->flags & SENDING) &&
 		    (p_from->p_sendto == proc2pid(p_who_wanna_recv))) {
 			/* Perfect, src is sending a message to
 			 * p_who_wanna_recv.
@@ -175,7 +175,7 @@ int msg_receive(pcb_t* current, int src, MESSAGE* m)
 				    * queue, so the queue must not be NULL
 				    */
 			while (p) {
-				assert(p_from->p_flags & SENDING);
+				assert(p_from->flags & SENDING);
 				if (proc2pid(p) == src) { /* if p is the one */
 					p_from = p;
 					break;
@@ -184,12 +184,12 @@ int msg_receive(pcb_t* current, int src, MESSAGE* m)
 				p = p->next_sending;
 			}
 
-			assert(p_who_wanna_recv->p_flags == 0);
+			assert(p_who_wanna_recv->flags == 0);
 			assert(p_who_wanna_recv->p_msg == 0);
 			assert(p_who_wanna_recv->p_recvfrom == NO_TASK);
 			assert(p_who_wanna_recv->p_sendto == NO_TASK);
 			assert(p_who_wanna_recv->q_sending != 0);
-			assert(p_from->p_flags == SENDING);
+			assert(p_from->flags == SENDING);
 			assert(p_from->p_msg != 0);
 			assert(p_from->p_recvfrom == NO_TASK);
 			assert(p_from->p_sendto == proc2pid(p_who_wanna_recv));
@@ -222,14 +222,14 @@ int msg_receive(pcb_t* current, int src, MESSAGE* m)
 
 		p_from->p_msg = 0;
 		p_from->p_sendto = NO_TASK;
-		p_from->p_flags &= ~SENDING;
+		p_from->flags &= ~SENDING;
 		unblock(p_from);
 	}
 	else {  /* nobody's sending any msg */
-		/* Set p_flags so that p_who_wanna_recv will not
+		/* Set flags so that p_who_wanna_recv will not
 		 * be scheduled until it is unblocked.
 		 */
-		p_who_wanna_recv->p_flags |= RECEIVING;
+		p_who_wanna_recv->flags |= RECEIVING;
 
 		p_who_wanna_recv->p_msg = m;
 
@@ -240,7 +240,7 @@ int msg_receive(pcb_t* current, int src, MESSAGE* m)
 
 		block(p_who_wanna_recv);
 
-		assert(p_who_wanna_recv->p_flags == RECEIVING);
+		assert(p_who_wanna_recv->flags == RECEIVING);
 		assert(p_who_wanna_recv->p_msg != 0);
 		assert(p_who_wanna_recv->p_recvfrom != NO_TASK);
 		assert(p_who_wanna_recv->p_sendto == NO_TASK);
@@ -277,7 +277,7 @@ int send_recv(int function, int src_dest, MESSAGE* msg)
 	return ret;
 }
 
-int sys_sendrec(int function, int src_dest, MESSAGE* m, pcb_t* p)
+int sys_sendrec(int function, int src_dest, MESSAGE* m, struct task_struct* p)
 {
 	int ret = 0;
 	int caller = proc2pid(p);

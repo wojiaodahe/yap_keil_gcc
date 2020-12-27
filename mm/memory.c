@@ -1,5 +1,6 @@
 #include "mm.h"
 #include "lib.h"
+#include "config.h"
 #include "printk.h"
 #include "page.h"
 #include "error.h"
@@ -15,8 +16,28 @@ unsigned long num_physpages;
 
 
 
+
 int phy_mem_init(void)
-{
+{   
+    int i;
+    int nr;
+    unsigned long offset;
+    unsigned long *p;
+    struct reserved_area *area0;
+    struct reserved_area *area1;
+
+    nr = get_reserved_area(&area0);
+
+    area1 = area0;
+    area1++;
+
+    for (i = 0; i < nr - 1; i++)    
+    {
+        memset((void *)(area0->start + area0->size), 0, area1->start - (area0->start + area0->size));
+        area0++;
+        area1++;
+    }
+
     return 0;
 }
 

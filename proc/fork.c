@@ -27,7 +27,7 @@ kmem_cache_t *vm_area_cachep;
 /* SLAB cache for mm_struct structures (tsk->mm) */
 kmem_cache_t *mm_cachep;
 
-struct task_struct *current;
+//struct task_struct *current;
 
 
 unsigned int nr_threads;

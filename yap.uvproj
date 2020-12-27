@@ -530,6 +530,11 @@
               <FileType>2</FileType>
               <FilePath>./arch/arm/2440slib.s</FilePath>
             </File>
+            <File>
+              <FileName>arm920.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>./arch/arm/arm920.s</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -819,6 +824,11 @@
               <FileName>oled.c</FileName>
               <FileType>1</FileType>
               <FilePath>./test/oled.c</FilePath>
+            </File>
+            <File>
+              <FileName>test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./test/test.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1440,6 +1450,11 @@
               <FileType>2</FileType>
               <FilePath>./arch/arm/2440slib.s</FilePath>
             </File>
+            <File>
+              <FileName>arm920.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>./arch/arm/arm920.s</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1729,6 +1744,11 @@
               <FileName>oled.c</FileName>
               <FileType>1</FileType>
               <FilePath>./test/oled.c</FilePath>
+            </File>
+            <File>
+              <FileName>test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./test/test.c</FilePath>
             </File>
           </Files>
         </Group>
