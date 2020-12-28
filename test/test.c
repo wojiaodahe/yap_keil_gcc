@@ -9,6 +9,8 @@
 
 #include "sched.h"
 
+
+extern unsigned char OS_RUNNING;
 extern struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args);
 extern struct mm_struct *mm_alloc(void);
 extern void schedule(void);
@@ -147,7 +149,7 @@ struct task_struct * tmp_get_next_ready(void)
 
     i++;
 
-    do_switch_mm(test_task_struct[0]->mm);
+    do_switch_mm(test_task_struct[i & 0x01]->mm);
     return test_task_struct[i & 0x01];
 }
 
@@ -174,7 +176,7 @@ void test_switch_mm(void)
     p = alloc_pages(GFP_KERNEL, 0);
     addr = (void *)page_address(p);
 
-    L1_BASE = (unsigned long)test_task_struct[0]->mm->pgd->pgd;
+    L1_BASE = (unsigned long)test_task_struct[0]->mm->pgd;
     L2_BASE = (unsigned long)addr;
     
     arch_mmap(0x32000000, 0x32001000, 0x1000, MMU_SECDESC_WB_NCNB);
@@ -185,12 +187,14 @@ void test_switch_mm(void)
     p = alloc_pages(GFP_KERNEL, 0);
     addr = (void *)page_address(p);
 
-    L1_BASE = (unsigned long)test_task_struct[1]->mm->pgd->pgd;
+    L1_BASE = (unsigned long)test_task_struct[1]->mm->pgd;
     L2_BASE = (unsigned long)addr;
     
-    arch_mmap(0x32000000, 0x32001000, 0x1000, MMU_SECDESC_WB_NCNB);
+    arch_mmap(0x32000000, 0x32002000, 0x2000, MMU_SECDESC_WB_NCNB);
 
     current = test_task_struct[0];
+
+    OS_RUNNING = 1;
     OS_Start();
 }
 

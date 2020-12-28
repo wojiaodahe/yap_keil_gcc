@@ -246,13 +246,13 @@ void OS_Sched()
     //if (preempt_count > 0)
     //    return;
 
-    kernel_disable_irq();
+   // kernel_disable_irq(); 
     
     next_run = OS_GetNextReady();
 	
 	__soft_schedule();
     
-    kernel_enable_irq();
+    //kernel_enable_irq();
 }
 
 void schedule(void)
