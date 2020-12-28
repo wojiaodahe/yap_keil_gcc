@@ -9,13 +9,22 @@
 
 #include "sched.h"
 
+extern struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args);
+extern struct mm_struct *mm_alloc(void);
+extern void schedule(void);
+extern void show_free_areas(void);
+extern void proc_caches_init(void);
+extern void cpu_arm920_cache_clean_invalidate_all(void);
+extern unsigned long MMU_TLB_BASE;
+extern void cpu_arm920_tlb_invalidate_all(void);
+unsigned long sys_brk(unsigned long brk);
+
 void test_mm()
 {
     int *p;
     int i;
     struct page *page0;
     unsigned char *test_kmalloc;
-    struct mm_struct *mm_test;
     kmem_cache_t *test_cache;
 
     page0 = alloc_pages(0, 0);
@@ -99,16 +108,98 @@ inline int arch_mmap(unsigned long vaddr, unsigned long paddr, unsigned long siz
     return 0;
 }
 
+int test_swich_mm_task0(void *arg)
+{
+    while (1)
+    {
+        printk("task 0\n");
+        schedule();
+    }
 
-extern void proc_caches_init(void);
-extern void cpu_arm920_cache_clean_invalidate_all(void);
-extern unsigned long MMU_TLB_BASE;
-extern void cpu_arm920_tlb_invalidate_all(void);
-unsigned long sys_brk(unsigned long brk);
+    return 0;
+}
+
+int test_swich_mm_task1(void *arg)
+{
+    while (1)
+    {
+        printk("task 1\n");
+        schedule();
+    }
+
+    return 0;
+}
+
+void do_switch_mm(struct mm_struct *mm)
+{
+    cpu_arm920_tlb_invalidate_all();
+    cpu_arm920_cache_clean_invalidate_all();
+    cpu_arm920_set_pgd((unsigned long)mm->pgd);
+    cpu_arm920_cache_clean_invalidate_all();
+    cpu_arm920_tlb_invalidate_all();
+
+}
+
+struct task_struct *test_task_struct[2];
+struct task_struct * tmp_get_next_ready(void)
+{
+    static unsigned int i = 0;
+
+    i++;
+
+    do_switch_mm(test_task_struct[0]->mm);
+    return test_task_struct[i & 0x01];
+}
+
+struct mm_struct *test_switch_mm_alloc_mm(void)
+{
+   struct mm_struct* mm = mm_alloc();
+   mm->mmlist.next = &mm->mmlist;
+   mm->mmlist.prev = &mm->mmlist;
+    
+   memcpy((void *)mm->pgd, (void *)TLB_BASE, 4096 * 4);
+
+   return mm;
+}
+
+void test_switch_mm(void)
+{
+    void *addr;
+    struct page *p;
+    
+
+    test_task_struct[0] = tmp_test_create_thread(test_swich_mm_task0, NULL);
+    test_task_struct[0]->mm = test_switch_mm_alloc_mm();
+
+    p = alloc_pages(GFP_KERNEL, 0);
+    addr = (void *)page_address(p);
+
+    L1_BASE = (unsigned long)test_task_struct[0]->mm->pgd->pgd;
+    L2_BASE = (unsigned long)addr;
+    
+    arch_mmap(0x32000000, 0x32001000, 0x1000, MMU_SECDESC_WB_NCNB);
+    
+    test_task_struct[1] = tmp_test_create_thread(test_swich_mm_task1, NULL);
+    test_task_struct[1]->mm = test_switch_mm_alloc_mm();
+    
+    p = alloc_pages(GFP_KERNEL, 0);
+    addr = (void *)page_address(p);
+
+    L1_BASE = (unsigned long)test_task_struct[1]->mm->pgd->pgd;
+    L2_BASE = (unsigned long)addr;
+    
+    arch_mmap(0x32000000, 0x32001000, 0x1000, MMU_SECDESC_WB_NCNB);
+
+    current = test_task_struct[0];
+    OS_Start();
+}
+
 
 struct task_struct test_current;
 void test_do_brk(void)
 {
+
+    test_switch_mm();
     struct mm_struct *mm_test;
     
     current = &test_current;

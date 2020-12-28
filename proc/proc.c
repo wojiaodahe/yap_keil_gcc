@@ -155,10 +155,50 @@ int kernel_thread_prio(int (*f)(void *), void *args, unsigned int prio)
 	return 0;
 }
 
+struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
+{ 
+    unsigned long flags;
+	unsigned int sp;
+	
+	struct task_struct *pcb = (struct task_struct *)alloc_pcb();
+	if (!pcb)
+		return NULL;
+
+	if((sp = (unsigned int)get_process_sp()) == 0)
+	{
+		printk("kernel_thread get sp_space error\r\n");
+		return NULL;
+	}
+
+	printk("get_pcb_addr: %x\r\n", (unsigned int)pcb);
+
+	sp 				        = (sp + TASK_STACK_SIZE);
+	pcb->sp 		        = sp;
+//	pcb->sp_bottom          = sp;
+	pcb->sp_size 	        = TASK_STACK_SIZE;
+
+    pcb->preempt_count      = 0;
+
+    pcb->prio               = PROCESS_PRIO_NORMAL;
+	pcb->pid 		        = pid++;
+	pcb->time_slice         = 5;
+	pcb->ticks 		        = 5;
+	pcb->root 		        = current->root;
+	pcb->pwd  		        = current->pwd;
+	memcpy(pcb->filp, current->filp, sizeof (pcb->filp));
+	
+	DO_INIT_SP(pcb->sp, f, args, thread_exit, 0x1f & get_cpsr(), 0);
+
+    return pcb;
+}
+
+
 struct task_struct *OS_GetNextReady(void)
 {
     int prio;
     struct task_struct *tmp;
+
+    return tmp_get_next_ready();
     
     for (prio = 0; prio < PROCESS_PRIO_BUTT; prio++)
     {
