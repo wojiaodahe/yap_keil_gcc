@@ -40,7 +40,6 @@ struct task_struct
 	unsigned int flags;
 	unsigned int sleep_time;
 
-	unsigned int status;
 	unsigned int state;
 
 	struct mm_struct *mm;

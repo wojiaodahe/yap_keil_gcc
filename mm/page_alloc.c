@@ -145,22 +145,26 @@ struct page *__alloc_pages(zonelist_t *zonelist, unsigned long order)
 
 struct page* alloc_pages(int gpf_mask, unsigned long order)
 {
-    return __alloc_pages(contig_page_data.node_zonelists + gpf_mask, order);
+    void *p;
+    struct page *page;
+    
+    page =  __alloc_pages(contig_page_data.node_zonelists + gpf_mask, order);
+    
+    p = page_address(page);
+    memset(p, 0, (1 << order) * 4096);
+
+    return page;
 }
 
 unsigned long __get_free_pages(int gfp_mask, unsigned long order)
 {
-    void *p;
 	struct page * page;
 
 	page = alloc_pages(gfp_mask, order);
 	if (!page)
 		return 0;
-    
-    p = page_address(page);
-    memset(p, 0, (1 << order) * 4096);
 
-	return (unsigned long)p;
+    return (unsigned long)page_address(page);
 }
 
 

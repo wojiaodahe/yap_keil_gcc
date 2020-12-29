@@ -325,7 +325,7 @@ cpu_arm920_set_pgd:
 	mov	ip, #0
 #ifdef CONFIG_CPU_ARM920_FORCE_WRITE_THROUGH
 	/* Any reason why we don't use mcr p15, 0, r0, c7, c7, 0 here? --rmk */
-	mcr	p15, 0, ip, c7, c6, 0		@ invalidate D cache
+@	mcr	p15, 0, ip, c7, c6, 0		@ invalidate D cache
 #else
 @ && 'Clean & Invalidate whole DCache'
 @ && Re-written to use Index Ops.
