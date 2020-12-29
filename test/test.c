@@ -139,7 +139,6 @@ void do_switch_mm(struct mm_struct *mm)
     cpu_arm920_set_pgd((unsigned long)mm->pgd);
     cpu_arm920_cache_clean_invalidate_all();
     cpu_arm920_tlb_invalidate_all();
-
 }
 
 struct task_struct *test_task_struct[2];
@@ -168,11 +167,11 @@ void test_switch_mm(void)
 {
     void *addr;
     struct page *p;
-    
 
     test_task_struct[0] = tmp_test_create_thread(test_swich_mm_task0, NULL);
+    current = &test_task_struct[0];
     test_task_struct[0]->mm = test_switch_mm_alloc_mm();
-
+#if 0
     p = alloc_pages(GFP_KERNEL, 0);
     addr = (void *)page_address(p);
 
@@ -180,10 +179,11 @@ void test_switch_mm(void)
     L2_BASE = (unsigned long)addr;
     
     arch_mmap(0x32000000, 0x32001000, 0x1000, MMU_SECDESC_WB_NCNB);
-    
+#endif
+
     test_task_struct[1] = tmp_test_create_thread(test_swich_mm_task1, NULL);
     test_task_struct[1]->mm = test_switch_mm_alloc_mm();
-    
+#if 0 
     p = alloc_pages(GFP_KERNEL, 0);
     addr = (void *)page_address(p);
 
@@ -191,8 +191,7 @@ void test_switch_mm(void)
     L2_BASE = (unsigned long)addr;
     
     arch_mmap(0x32000000, 0x32002000, 0x2000, MMU_SECDESC_WB_NCNB);
-
-    current = test_task_struct[0];
+#endif
 
     OS_RUNNING = 1;
     OS_Start();

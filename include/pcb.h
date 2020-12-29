@@ -5,6 +5,7 @@
 #include "fs.h"
 #include "config.h"
 #include "wait.h"
+#include "mm.h"
 
 #include "printk.h"
 

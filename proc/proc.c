@@ -185,7 +185,7 @@ struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
 	pcb->ticks 		        = 5;
 	pcb->root 		        = current->root;
 	pcb->pwd  		        = current->pwd;
-	memcpy(pcb->filp, current->filp, sizeof (pcb->filp));
+	//memcpy(pcb->filp, current->filp, sizeof (pcb->filp));
 	
 	DO_INIT_SP(pcb->sp, f, args, thread_exit, 0x1f & get_cpsr(), 0);
 

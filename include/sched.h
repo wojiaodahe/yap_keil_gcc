@@ -17,39 +17,6 @@
 #define TASK_ZOMBIE		4
 #define TASK_STOPPED		8
 
-#if 0
-struct task_struct 
-{
-    unsigned int pid;
-
-    volatile long state; /* -1 unrunnable, 0 runnable, >0 stopped */
-    unsigned long flags; /* per process flags, defined below */
-    int did_exec;
-
-    volatile long need_resched;
-
-    long counter;
-    int lock_depth;
-    unsigned long start_time;
-
-    struct mm_struct *mm;
-    struct mm_struct *active_mm;
-
-	struct task_struct *p_opptr, *p_pptr, *p_cptr, *p_ysptr, *p_osptr;
-
-    struct list_head run_list;
-
-    struct file *filp[NR_OPEN];
-    struct inode *pwd;
-    struct inode *root;
-
-    wait_queue_t wait_childexit;
-    spinlock_t alloc_lock;
-
-    unsigned long min_flt, maj_flt, nswap, cmin_flt, cmaj_flt, cnswap;
-};
-#endif
-
 extern struct task_struct *current;
 extern kmem_cache_t *sigact_cachep;
 extern kmem_cache_t *files_cachep;
