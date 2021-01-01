@@ -54,6 +54,8 @@ void mem_init(unsigned long START, unsigned long END)
 
     for (node = 0; node < numnodes; node++)
         totalram_pages = free_all_bootmem_core(NODE_DATA(node));
+
+    empty_zero_page = alloc_page(GFP_KERNEL);
 }
 
 void free_area_init(unsigned long *zones_size)

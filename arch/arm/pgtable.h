@@ -73,8 +73,21 @@ extern void ptep_set_wrprotect(pte_t *ptep);
 #define _PAGE_USER_TABLE	(PMD_TYPE_TABLE | PMD_DOMAIN(DOMAIN_USER))
 #define _PAGE_KERNEL_TABLE	(PMD_TYPE_TABLE | PMD_DOMAIN(DOMAIN_KERNEL))
 
-#define mk_user_pmd(ptep)	__mk_pmd(ptep, _PAGE_USER_TABLE)
-#define mk_kernel_pmd(ptep)	__mk_pmd(ptep, _PAGE_KERNEL_TABLE)
+#define mk_user_pmd(ptep)	\
+({\
+	pmd_t pmd;\
+	unsigned long pte_ptr = (unsigned long)ptep;\
+	pmd_val(pmd) = __virt_to_phys(pte_ptr);\
+    pmd;\
+})
+
+#define mk_kernel_pmd(ptep)\
+({\
+	pmd_t pmd;\
+	unsigned long pte_ptr = (unsigned long)ptep;\
+	pmd_val(pmd) = __virt_to_phys(pte_ptr);\
+    pmd;\
+})
 
 #define PMD_SHIFT		    20
 #define PGDIR_SHIFT		    20
@@ -94,8 +107,14 @@ pgd_t *pgd_alloc(void);
 pmd_t *pmd_alloc(pgd_t *pgd, unsigned long address);
 pte_t *pte_alloc(pmd_t *pmd, unsigned long address);
 pte_t ptep_get_and_clear(pte_t *ptep);
-pte_t mk_pte(struct page *page, pgprot_t pgprot);
 void pte_free(pte_t *pte);
+
+#define mk_pte(page, pgprot)\
+({\
+	pte_t __pte;\
+	pte_val(__pte) = __pa(page_address(page)) + pgprot_val(pgprot);\
+	__pte;\
+})
 
 #define pte_none(pte)		(!pte_val(pte))
 

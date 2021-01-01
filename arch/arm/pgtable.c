@@ -8,18 +8,9 @@ unsigned long pmd_page(pmd_t pmd)
 
 	val = pmd.pmd;
 
-	return __phys_to_virt(pmd_val(pmd) & ~_PAGE_TABLE);
+	return __phys_to_virt(pmd_val(pmd) &~0xfff & ~_PAGE_TABLE);
 }
 
-pmd_t __mk_pmd(pte_t *ptep, unsigned long prot)
-{
-	pmd_t pmd;
-	unsigned long pte_ptr = (unsigned long)ptep;
-
-	pmd_val(pmd) = __virt_to_phys(pte_ptr);// | prot;
-
-	return pmd;
-}
 
 pte_t ptep_get_and_clear(pte_t *ptep)
 {
@@ -84,12 +75,6 @@ pte_t pte_mkyoung(pte_t pte)
 	return pte;
 }
 
-pte_t mk_pte(struct page *page, pgprot_t pgprot)
-{
-	pte_t __pte;
-	pte_val(__pte) = __pa(page_address(page)) + pgprot_val(pgprot);
-	return __pte;
-}
 
  void ptep_set_wrprotect(pte_t *ptep)
 {

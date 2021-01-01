@@ -36,6 +36,7 @@
 .global cpu_arm920_set_pte
 .global cpu_arm920_cache_clean_invalidate_all
 .global cpu_arm920_tlb_invalidate_all
+.global cpu_arm920_clean_dentry_and_drain_Wb
 
 	.text
 
@@ -401,3 +402,17 @@ cpu_arm920_set_pte:
 	mcr	p15, 0, r0, c7, c10, 4		@ drain WB
 	mov	pc, lr
 
+cpu_arm920_clean_dentry_and_drain_Wb:
+	mov r0, #0
+	
+	mov	r1, #7 << 5			@ 8 segments
+1:	orr	r3, r1, #63 << 26		@ 64 entries
+2:	mcr	p15, 0, r3, c7, c14, 2		@ clean & invalidate D index
+	subs	r3, r3, #1 << 26
+	bcs	2b				@ entries 63 to 0
+	subs	r1, r1, #1 << 5
+	bcs	1b				@ segments 7 to 0
+
+	mcr	p15, 0, r0, c7, c10, 4		@ drain WB
+
+	mov	pc, lr

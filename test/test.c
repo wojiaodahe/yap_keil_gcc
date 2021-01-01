@@ -104,7 +104,7 @@ inline void set_l2_desc(unsigned long l2_base, unsigned long vaddr, unsigned lon
 
 inline int arch_mmap(unsigned long vaddr, unsigned long paddr, unsigned long size, unsigned long attr)
 {
-    set_l2_desc(L2_BASE, vaddr, paddr | 0xff0 | 1 << 2 | 1 <<3 | 0x02);
+    set_l2_desc(L2_BASE, vaddr, paddr | 0xff0 | 1 << 2 | 1 << 3 | 0x02);
     set_l1_desc(L1_BASE, vaddr, L2_BASE | (3 << 5) | 0x01);
 
     return 0;
@@ -112,10 +112,13 @@ inline int arch_mmap(unsigned long vaddr, unsigned long paddr, unsigned long siz
 
 int test_swich_mm_task0(void *arg)
 {
-    *(volatile unsigned int *)0x32000000 = 0xaa;
+    do_brk(0x40000000, 0x1000);
+    do_brk(0x90001000, 0x1000);
     while (1)
     {
-        printk("task 0 0x32000000: %x\n", *(volatile unsigned int *)0x32000000);
+        *(volatile unsigned long *)0x40000000 = 0x1234abcd;
+        *(volatile unsigned long *)0x90001000 = 0x1234abcd;
+        printk("task 0 0x40000000: %x\n", *(volatile unsigned int *)0x40000000);
         schedule();
     }
 
@@ -124,10 +127,10 @@ int test_swich_mm_task0(void *arg)
 
 int test_swich_mm_task1(void *arg)
 {
-    *(volatile unsigned int *)0x32000000 = 0x55;
+    *(volatile unsigned int *)0x40000000 = 0x55;
     while (1)
     {
-        printk("task 1 0x32000000: %x\n", *(volatile unsigned int *)0x32000000);
+        printk("task 1 0x40000000: %x\n", *(volatile unsigned int *)0x40000000);
         schedule();
     }
 
@@ -175,17 +178,16 @@ void test_switch_mm(void)
     struct mm_struct *mm;
 
     test_task_struct[0] = tmp_test_create_thread(test_swich_mm_task0, NULL);
-    current = test_task_struct[0];
     mm = test_switch_mm_alloc_mm();
     test_task_struct[0]->mm = mm;
-#if 1
+#if 0 
     p = alloc_pages(GFP_KERNEL, 0);
     addr = (void *)page_address(p);
 
     L1_BASE = (unsigned long)test_task_struct[0]->mm->pgd;
     L2_BASE = (unsigned long)addr;
     
-    arch_mmap(0x32000000, 0x32001000, 0x1000, MMU_SECDESC_WB_NCNB);
+    arch_mmap(0x40000000, 0x32001000, 0x1000, MMU_SECDESC_WB_NCNB);
 #endif
 
     test_task_struct[1] = tmp_test_create_thread(test_swich_mm_task1, NULL);
@@ -198,7 +200,7 @@ void test_switch_mm(void)
     L1_BASE = (unsigned long)test_task_struct[1]->mm->pgd;
     L2_BASE = (unsigned long)addr;
     
-    arch_mmap(0x32000000, 0x32002000, 0x2000, MMU_SECDESC_WB_NCNB);
+    arch_mmap(0x40000000, 0x32002000, 0x2000, MMU_SECDESC_WB_NCNB);
 #endif
     
     printk("%x %x\n", test_task_struct[0], test_task_struct[0]->mm);
@@ -208,6 +210,7 @@ void test_switch_mm(void)
     printk("%x %x\n", test_task_struct[1], test_task_struct[1]->mm);
 
     OS_RUNNING = 1;
+    current = test_task_struct[0];
     do_switch_mm(test_task_struct[0]->mm);
     OS_Start();
 }

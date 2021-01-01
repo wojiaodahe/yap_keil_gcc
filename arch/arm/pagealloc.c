@@ -8,6 +8,25 @@
 #include "common.h"
 #include "pgalloc.h"
 
+extern void cpu_arm920_clean_dentry_and_drain_Wb(void);
+
+void set_pmd(pmd_t *pmd, pmd_t entry)
+{
+    entry.pmd &= ~(0x1ff);
+
+    pmd->pmd = entry.pmd | (3 << 5) | 0x01;
+
+    cpu_arm920_clean_dentry_and_drain_Wb();
+}
+
+void set_pte(pte_t *pte_table, pte_t entry)
+{
+    entry.pte &= ~(0xfff);
+
+    pte_table->pte = entry.pte | 0xff0 | (1 << 2) | (1 << 3) | 0x02;
+    cpu_arm920_clean_dentry_and_drain_Wb();
+}
+
 
 pte_t *get_bad_pte_table(void)
 {
@@ -93,7 +112,7 @@ pgd_t *get_pgd_slow(void)
     pgd_t *pgd = (pgd_t *)__get_free_pages(GFP_KERNEL, 2);
     pmd_t *new_pmd;
 
-    if (pgd)
+    if (0)
     {
         pgd_t *init = pgd_offset_k(0);
 #if 0

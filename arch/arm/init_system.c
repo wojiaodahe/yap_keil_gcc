@@ -205,15 +205,15 @@ void stop_mmu(void)
    int r0;
 
 	__asm__(
-		"mrc    p15, 0, r0, c1, c0, 0\n"    /* 锟斤拷锟斤拷锟斤拷锟狡寄达拷锟斤拷锟斤拷值 */
+		"mrc    p15, 0, r0, c1, c0, 0\n"    /* 閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鐙″瘎杈炬嫹閿熸枻鎷烽敓鏂ゆ嫹鍊� */
 
 		                                /* .RVI ..RS B... .CAM */
-		"bic    r0, r0, #0x3000\n"          /* ..11 .... .... .... 锟斤拷锟絍锟斤拷I位 */
-		"bic    r0, r0, #0x0300\n"          /* .... ..11 .... .... 锟斤拷锟絉锟斤拷S位 */
-		"bic    r0, r0, #0x0087\n"          /* .... .... 1... .111 锟斤拷锟紹/C/A/M */
-		"bic    r0, r0, #0x0001\n"          /* .... .... .... ...1 锟斤拷止MMU */
+		"bic    r0, r0, #0x3000\n"          /* ..11 .... .... .... 閿熸枻鎷烽敓绲嶉敓鏂ゆ嫹I浣� */
+		"bic    r0, r0, #0x0300\n"          /* .... ..11 .... .... 閿熸枻鎷烽敓绲夐敓鏂ゆ嫹S浣� */
+		"bic    r0, r0, #0x0087\n"          /* .... .... 1... .111 閿熸枻鎷烽敓绱�/C/A/M */
+		"bic    r0, r0, #0x0001\n"          /* .... .... .... ...1 閿熸枻鎷锋MMU */
 
-		"mcr    p15, 0, r0, c1, c0, 0\n"    /* 锟斤拷锟睫改碉拷值写锟斤拷锟斤拷萍拇锟斤拷锟� */		
+		"mcr    p15, 0, r0, c1, c0, 0\n"    /* 閿熸枻鎷烽敓鐫敼纰夋嫹鍊煎啓閿熸枻鎷烽敓鏂ゆ嫹钀嶆媷閿熸枻鎷烽敓锟� */		
     );
 }
 
@@ -232,10 +232,10 @@ void init_clock(void)
     // LOCKTIME = 0x00ffffff;   // ???????
     CLKDIVN  = 0x05;            // FCLK:HCLK:PCLK=1:2:4, HDIVN=1,PDIVN=1
     
-    /* ??HDIVN?0,CPU????????閿熺禎ast bus mode閿燂拷??閿熺禈synchronous bus mode閿燂拷 */
+    /* ??HDIVN?0,CPU????????闁跨喓绂巃st bus mode闁跨噦鎷�??闁跨喓绂坰ynchronous bus mode闁跨噦鎷� */
 __asm__(
     "mrc    p15, 0, r1, c1, c0, 0\n"        /* ??????? */
-    "orr    r1, r1, #0xc0000000\n"          /* ???閿熺禈synchronous bus mode閿燂拷 */
+    "orr    r1, r1, #0xc0000000\n"          /* ???闁跨喓绂坰ynchronous bus mode闁跨噦鎷� */
     "mcr    p15, 0, r1, c1, c0, 0\n"        /* ??????? */
     :
     :
@@ -282,6 +282,9 @@ int init_system(void)
     disable_watch_dog();
 
     init_clock();
+
+    memset((void *)TLB_BASE, 0, 0x10000);
+
     create_page_table();
     start_mmu();
 

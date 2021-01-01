@@ -55,8 +55,8 @@ typedef struct pgprot
 #define pmd_none(pmd)		(!pmd_val(pmd))
 #define pmd_clear(pmdp)		set_pmd(pmdp, __pmd(0))
 
-#define set_pte(ptep, pte) (*(ptep) = pte)
-#define set_pmd(pmdp, pmd) (*(pmdp) = pmd) 
+//#define set_pte(ptep, pte) (*(ptep) = pte)
+//#define set_pmd(pmdp, pmd) (*(pmdp) = pmd) 
 #define pmd_bad(pmd) (pmd_val(pmd) & 2)
 #define pmd_offset(dir, addr)	((pmd_t *)(dir))
 
