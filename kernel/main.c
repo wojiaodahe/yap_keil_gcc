@@ -5,7 +5,7 @@
 #include "lib.h"
 #include "printk.h"
 #include "list.h"
-
+#include "config.h"
 #include "unistd.h"
 #include "fcntl.h"
 #include "wait.h"
@@ -14,6 +14,7 @@
 #include "inet_socket.h"
 #include "timer.h"
 #include "completion.h"
+#include "sched.h"
 
 #include "mm.h"
 #include "page.h"
@@ -287,7 +288,7 @@ int test_user_syscall_printf(void *argc)
 {
 	while (1)
 	{
-//		myprintf("Process Test Printf %d %x %c %s", 10, 0xaa, 'p', "test string\n");
+		myprintf("Process Test Printf %d %x %c %s", 10, 0xaa, 'p', "test string\n");
 		ssleep(1);
 	}
 }
@@ -321,9 +322,45 @@ int test_completion(void *arg)
     while (1)
     {
         mod_timer(&test_completion_timer, 100);
-//        printk("Test completion test_done.done %d\n", test_done.done);
+        printk("Test completion test_done.done %d\n", test_done.done);
         wait_for_completion(&test_done);
     }
+}
+
+int test_fork(void *arg)
+{
+	while (1)
+	{
+		ssleep(1);
+	}
+}
+
+int test_single_mm(void *arg)
+{
+	current->mm = mm_alloc();
+
+	memcpy(current->mm->pgd, (void *)TLB_BASE, 8192);
+
+	do_brk(0x40000000, 0x1000);
+	switch_mm(current->mm);
+
+	*(volatile unsigned long *)0x40000000 = 0xdeadbeef;
+	while (1)
+	{
+		printk("%s %x\n", __func__, *(volatile unsigned long *)0x40000000);
+		ssleep(1);
+	}
+}
+
+int test_brk(void *arg)
+{
+	do_brk(0x40000000, 0x1000);
+	*(volatile unsigned long *)0x40000000 = 0x1234abcd;
+	while (1)
+	{
+		printk("%s %x\n", __func__, *(volatile unsigned long *)0x40000000);
+		ssleep(1);
+	}
 }
 
 extern int s3c24xx_init_tty(void);
@@ -334,22 +371,23 @@ int kernel_main()
 
 
 	//phy_mem_init();
-	s3c24xx_init_tty();
+	//s3c24xx_init_tty();
 	paging_init();
 	mem_init(0x30000000, 0x34000000);
 	show_free_areas();
     
 	kmem_cache_init();
     kmem_cache_sizes_init();
-    proc_caches_init();
-
+	proc_caches_init();
+#if 0
 	//test_mm();
 	test_set_pgd();
 
 	while (1)
 		;
+#endif
 
-    init_key_irq();
+	init_key_irq();
 	
 	OS_Init();
 	OS_Start();

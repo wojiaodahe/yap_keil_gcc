@@ -47,7 +47,12 @@ static struct mm_struct * mm_init(struct mm_struct * mm)
 	//mm->page_table_lock = SPIN_LOCK_UNLOCKED;
 	mm->pgd = pgd_alloc();
 	if (mm->pgd)
-		return mm;
+    {
+        mm->mmlist.next = &mm->mmlist;
+        mm->mmlist.prev = &mm->mmlist;
+        return mm;
+    }
+
 	free_mm(mm);
 	return NULL;
 }

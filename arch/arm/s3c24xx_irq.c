@@ -33,7 +33,7 @@ inline unsigned long arch_local_irq_save(void)
 {
       unsigned long flags = 0;
 
-    __asm__ __volatile__(
+    __asm__ (
             "mrs r1, cpsr\n"
             "mov %0, r1\n"
             "orr r1, r1, #0x80\n"

@@ -105,6 +105,8 @@ int kernel_thread(int (*f)(void *), void *args)
 	
 	DO_INIT_SP(pcb->sp, f, args, thread_exit, 0x1f & get_cpsr(), 0);
 
+    pcb->mm = current->mm;
+
 //	enter_critical();
     
     local_irq_save(flags);
@@ -148,6 +150,7 @@ int kernel_thread_prio(int (*f)(void *), void *args, unsigned int prio)
 	
 	DO_INIT_SP(pcb->sp, f, args, thread_exit, 0x1f & get_cpsr(), 0);
 
+    pcb->mm = current->mm;
 	enter_critical();
 	pcb_list_add(&proc_list[prio].head, pcb);
 	exit_critical();
@@ -198,7 +201,7 @@ struct task_struct *OS_GetNextReady(void)
     int prio;
     struct task_struct *tmp;
 
-    return tmp_get_next_ready();
+    //return tmp_get_next_ready();
     
     for (prio = 0; prio < PROCESS_PRIO_BUTT; prio++)
     {
@@ -212,6 +215,8 @@ struct task_struct *OS_GetNextReady(void)
             if (tmp->flags == PROCESS_READY)
             {
                 proc_list[prio].current = tmp;
+                if (tmp->mm != current->mm)
+                    switch_mm(tmp->mm);
                 return tmp;
             }
         } while (tmp != proc_list[prio].current);
@@ -246,13 +251,13 @@ void OS_Sched()
     //if (preempt_count > 0)
     //    return;
 
-   // kernel_disable_irq(); 
+    kernel_disable_irq(); 
     
     next_run = OS_GetNextReady();
 	
 	__soft_schedule();
     
-    //kernel_enable_irq();
+    kernel_enable_irq();
 }
 
 void schedule(void)
@@ -609,6 +614,10 @@ extern void s3c24xx_controler_init(void);
 extern void spi_info_jz2440_init(void);
 extern int spi_oled_init(void);
 extern void sys_timer_init(void);
+extern int test_fork(void *arg);
+extern int test_single_mm(void *arg);
+extern int test_brk(void *arg);
+
 int OS_INIT_PROCESS(void *argv)
 {
 	int ret;
@@ -681,9 +690,12 @@ int OS_INIT_PROCESS(void *argv)
 //	kernel_thread(test_user_syscall_open, (void *)2);
 	kernel_thread_prio(test_user_syscall_printf, (void *)2, PROCESS_PRIO_HIGH);
 //	kernel_thread(test_wait_queue, (void *)2);
-	kernel_thread(test_socket, (void *)2);
+	//kernel_thread(test_socket, (void *)2);
 	kernel_thread(test_completion, (void *)2);
 	kernel_thread(test_oled, (void *)2);
+	kernel_thread(test_brk, (void *)2);
+	kernel_thread(test_fork, (void *)2);
+	kernel_thread(test_single_mm, (void *)2);
 //	kernel_thread(test_oled1, (void *)2);
 //	kernel_thread_prio(test_exit,   (void *)2, PROCESS_PRIO_LOW);
     
@@ -758,6 +770,15 @@ int OS_Init(void)
     	panic();
     }
 
+    current->mm = mm_alloc();
+    if (!current->mm)
+    {
+		printk("%s alloc_mm failed\n", __func__);
+		panic();
+    }
+
+    memcpy(current->mm->pgd, (void *)TLB_BASE, 8192);
+
 	ret = kernel_thread(OS_INIT_PROCESS, (void *)0);
 	if (ret < 0)
 	{
@@ -766,7 +787,7 @@ int OS_Init(void)
 	}
 	
 	current = proc_list[PROCESS_PRIO_NORMAL].head.next;
-
+    switch_mm(current->mm);
 	timer_list_init();
     
     return 0;
