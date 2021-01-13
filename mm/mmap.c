@@ -711,11 +711,11 @@ void show_pmd(pmd_t *pmd)
     int i;
     pte_t *pte;
 
-    pte = pte_alloc(pmd, 0);
-    
+    pte = (pte_t *)pmd_page(*pmd) + 0;
+
     for (i = 0; i < 1024; i++)
     {
-        if (pte_val(*pte))
+        if (pte && pte_val(*pte))
         {
             printk("pte%d: %p pte->pte: %lx\n", i, pte, pte->pte);
         }
@@ -745,7 +745,7 @@ void show_mm(struct mm_struct *mm)
 {
     struct vm_area_struct *vma = NULL;
 
-    if (mm)
+    if (mm && mm->mmap)
     {
         vma = mm->mmap;
 

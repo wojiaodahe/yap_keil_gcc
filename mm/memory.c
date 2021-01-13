@@ -101,6 +101,7 @@ void free_page_and_swap_cache(struct page *page)
 int copy_page_range(struct mm_struct *dst, struct mm_struct *src, struct vm_area_struct *vma)
 {
     pgd_t *src_pgd, *dst_pgd;
+    unsigned char need_copy = 0;
     unsigned long address = vma->vm_start;
     unsigned long end = vma->vm_end;
     unsigned long cow = (vma->vm_flags & (VM_SHARED | VM_MAYWRITE)) == VM_MAYWRITE;
@@ -191,6 +192,7 @@ skip_copy_pte_range:
                 {
                     ptep_set_wrprotect(src_pte);
                     pte = *src_pte;
+                    need_copy = 1;
                 }
 
                 /* If it's a shared mapping, mark it clean in the child */
@@ -201,6 +203,8 @@ skip_copy_pte_range:
 
 cont_copy_pte_range:
                 set_pte(dst_pte, pte);
+                handle_mm_fault(dst, vma, address, 1);
+                need_copy = 0;
 cont_copy_pte_range_noset:
                 address += PAGE_SIZE;
                 if (address >= end)
@@ -378,11 +382,13 @@ static int is_page_shared(struct page *page)
 
 void copy_cow_page(struct page * from, struct page * to, unsigned long address)
 {
+    void *src = page_address(from);
+    void *dst = page_address(to);
 
+    memcpy(dst, src, PAGE_SIZE);
 }
 
-void break_cow(struct vm_area_struct * vma, struct page *	old_page, struct page * new_page, unsigned long address, 
-		pte_t *page_table)
+void break_cow(struct vm_area_struct *vma, struct page *old_page, struct page *new_page, unsigned long address, pte_t *page_table)
 {
 	copy_cow_page(old_page,new_page,address);
     //flush_page_to_ram(new_page);
@@ -649,7 +655,7 @@ static inline int handle_pte_fault(struct mm_struct *mm, struct vm_area_struct *
 
     if (write_access)
     {
-        if (!pte_write(entry))
+    //    if (!pte_write(entry))
             return do_wp_page(mm, vma, address, pte, entry);
 
         entry = pte_mkdirty(entry);

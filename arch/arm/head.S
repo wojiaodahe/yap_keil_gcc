@@ -7,12 +7,15 @@
 .global enable_irq
 .global disable_irq
 .global OSIntNesting
+.global switch_curretn_mm
 
 .global __int_schedule
 .global __soft_schedule
 .global OS_Start
 .global syscall
 .global _start
+.global sys_fork
+.global do_sys_fork
 
 .global  IRQ_MODE_STACK
 .global  FIQ_MODE_STACK
@@ -179,7 +182,13 @@ HandleIRQ:
    	msr		SPSR_cxsf, R14
 	ldmia	sp!, {pc}^	
 
-__int_schedule:               
+__arm_restore_context:               
+
+	ldr		r0, =FIQ_MODE_STACK
+	ldr		r0, [r0]
+	mov		sp, r0
+
+	bl 		switch_current_mm
 	ldr		r0, =current
 	ldr		r0, [r0]
 	add		r0, r0, #4
@@ -193,6 +202,9 @@ __int_schedule:
 	ldmia	sp!, {r14}
    	msr		SPSR_cxsf, R14
 	ldmia	sp!, {pc}^	
+
+__int_schedule:
+	b		__arm_restore_context
 
 __soft_schedule:		
 	stmfd	sp!, {r0}
@@ -217,32 +229,10 @@ __soft_schedule:
 	LDR		R0, [R0]
 	STR		R0, [R1]
 
-	add		r0, r0, #4
-	ldmia	r0!, {r1-r14}
-	
-	msr     CPSR_cxsf, #(DISABLE_FIQ | DISABLE_IRQ | FIQ_MOD)
-
-	mov 	sp, r0
-	sub 	r0, r0, #60
-	ldmia	r0, {r0}
-	ldmia	sp!, {r14}
-   	msr		SPSR_cxsf, R14
-	ldmia	sp!, {pc}^	
+	b		__arm_restore_context
 
 OS_Start:
-	ldr		r0, =current
-	ldr		r0, [r0]
-	add		r0, r0, #4
-	ldmia	r0!, {r1-r14}
-	
-	msr     CPSR_cxsf, #(DISABLE_FIQ | DISABLE_IRQ | FIQ_MOD)
-
-	mov 	sp, r0
-	sub 	r0, r0, #60
-	ldmia	r0, {r0}
-	ldmia	sp!, {r14}
-   	msr		SPSR_cxsf, R14
-	ldmia	sp!, {pc}^	
+	b		__arm_restore_context
 
 HandleSWI:
 	STMFD   SP!, {R1-R3}			@ We will use R1-R3 as temporary registers
@@ -305,7 +295,34 @@ syscall:
 	add		r13, r13, #8
 	mov pc, lr
 
+sys_fork:
+	stmia	r0!, {R0-R14}   	@R0-R12 LR
+	stmfd	sp!, {r1}
+	mrs		R1,  CPSR       	@Push CPSR
+	stmia	r0!, {R1}	
+	stmia	r0!, {LR}           @PC
+	ldmfd	sp!, {r1}
 
+	sub		r0, r0, #68
+
+	stmfd	sp!, {r0-r12}
+	mrs		r3,  cpsr
+	stmfd	sp!, {r3}
+	stmfd	sp!, {lr}
+
+	bl		do_sys_fork
+
+	ldmfd	sp!, {lr}
+	ldmfd	sp!, {r3}
+   	msr		CPSR_cxsf, r3
+	ldmfd	sp!, {r0-r12}
+
+
+	mov 	pc,  lr
+
+arm_switch_mm:
+
+ 
 current_task_sp:
 	mov r0, sp
 	mov pc, lr

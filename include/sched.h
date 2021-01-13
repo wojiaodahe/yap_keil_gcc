@@ -18,6 +18,7 @@
 #define TASK_STOPPED		8
 
 extern struct task_struct *current;
+extern struct task_struct *old_task;
 extern kmem_cache_t *sigact_cachep;
 extern kmem_cache_t *files_cachep;
 extern kmem_cache_t *fs_cachep;

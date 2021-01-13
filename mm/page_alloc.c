@@ -97,7 +97,8 @@ static struct page *rmqueue(zone_t *zone, unsigned long order)
             set_page_count(page, 1);
             if (BAD_RANGE(zone, page))
                 BUG();
-
+            			
+            set_page_count(page, 1);
             return page;
         }
 

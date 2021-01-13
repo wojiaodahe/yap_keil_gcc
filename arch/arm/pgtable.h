@@ -15,14 +15,14 @@
 #define PTE_BUFFERABLE		0x0004
 
 
-#define L_PTE_PRESENT		(1 << 0)
-#define L_PTE_YOUNG		    (1 << 1)
+#define L_PTE_PRESENT		(0x0003)
+#define L_PTE_YOUNG		    (0)
 #define L_PTE_BUFFERABLE	(1 << 2)
 #define L_PTE_CACHEABLE		(1 << 3)
-#define L_PTE_USER		    (1 << 4)
-#define L_PTE_WRITE		    (1 << 5)
-#define L_PTE_EXEC		    (1 << 6)
-#define L_PTE_DIRTY		    (1 << 7)
+#define L_PTE_USER		    (0)
+#define L_PTE_WRITE		    (0x0550)
+#define L_PTE_EXEC		    (0)
+#define L_PTE_DIRTY		    (0)
 
 
 /*

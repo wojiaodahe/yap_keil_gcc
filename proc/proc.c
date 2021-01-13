@@ -23,6 +23,7 @@ extern void *alloc_stack(void);
 
 struct task_struct *next_run;
 struct task_struct *current;
+struct task_struct *old_task;
 static struct proc_list_head proc_list[PROCESS_PRIO_BUTT];
 static struct task_struct sleep_proc_list_head;
 static unsigned int OS_TICKS = 0;
@@ -210,6 +211,14 @@ struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
 	pcb->root 		        = current->root;
 	pcb->pwd  		        = current->pwd;
 	//memcpy(pcb->filp, current->filp, sizeof (pcb->filp));
+    
+    current = pcb;
+    pcb->mm = test_switch_mm_alloc_mm();
+    memcpy((void *)pcb->mm->pgd, (void *)TLB_BASE, 4096 * 4);
+    do_brk(0x80000000, 0x3000);
+    pcb->sp = 0x80000000 + 0x2000;
+
+   
 	
 	DO_INIT_CONTEXT(&pcb->regs, f, args, thread_exit, 0x1f & get_cpsr(), pcb->sp, 0);
 
@@ -222,7 +231,7 @@ struct task_struct *OS_GetNextReady(void)
     int prio;
     struct task_struct *tmp;
 
-    //return tmp_get_next_ready();
+    return tmp_get_next_ready();
     
     for (prio = 0; prio < PROCESS_PRIO_BUTT; prio++)
     {
@@ -236,8 +245,6 @@ struct task_struct *OS_GetNextReady(void)
             if (tmp->flags == PROCESS_READY)
             {
                 proc_list[prio].current = tmp;
-                if (tmp->mm != current->mm)
-                    switch_mm(tmp->mm);
                 return tmp;
             }
         } while (tmp != proc_list[prio].current);
@@ -272,13 +279,13 @@ void OS_Sched()
     //if (preempt_count > 0)
     //    return;
 
-    kernel_disable_irq(); 
+   // kernel_disable_irq(); 
     
     next_run = OS_GetNextReady();
 	
 	__soft_schedule();
     
-    kernel_enable_irq();
+    //kernel_enable_irq();
 }
 
 void schedule(void)
@@ -714,9 +721,6 @@ int OS_INIT_PROCESS(void *argv)
 	//kernel_thread(test_socket, (void *)2);
 	kernel_thread(test_completion, (void *)2);
 	kernel_thread(test_oled, (void *)2);
-	kernel_thread(test_brk, (void *)2);
-	kernel_thread(test_fork, (void *)2);
-	kernel_thread(test_single_mm, (void *)2);
 //	kernel_thread(test_oled1, (void *)2);
 //	kernel_thread_prio(test_exit,   (void *)2, PROCESS_PRIO_LOW);
     
@@ -791,15 +795,6 @@ int OS_Init(void)
     	panic();
     }
 
-    current->mm = mm_alloc();
-    if (!current->mm)
-    {
-		printk("%s alloc_mm failed\n", __func__);
-		panic();
-    }
-
-    memcpy(current->mm->pgd, (void *)TLB_BASE, 8192);
-
 	ret = kernel_thread(OS_INIT_PROCESS, (void *)0);
 	if (ret < 0)
 	{
@@ -808,7 +803,7 @@ int OS_Init(void)
 	}
 	
 	current = proc_list[PROCESS_PRIO_NORMAL].head.next;
-    switch_mm(current->mm);
+
 	timer_list_init();
     
     return 0;

@@ -27,7 +27,7 @@
 #define RESERVED_AREA_START            (0x33500000)
 #define RESERVED_AREA_SIZE             (PHY_MEM_END - RESERVED_AREA_START)
 
-#define TASK_STACK_SIZE					4096
+#define TASK_STACK_SIZE					0x2000
 
 #define MAX_TASK_NUM                    128
 

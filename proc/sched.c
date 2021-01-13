@@ -7,15 +7,20 @@
 #include "error.h"
 #include "slab.h"
 #include "mm.h"
-
-extern void cpu_arm920_set_pgd(unsigned long pgd);
  
+
+extern void tmp_add_task_struct(struct task_struct *tsk);
+extern struct task_struct *test_task_struct[2];
 void wake_up_process(struct task_struct * p)
 {
-
+    test_task_struct[1] = p;
 }
 
-void switch_mm(struct mm_struct *mm)
+void switch_current_mm(void)
 {
-    cpu_arm920_set_pgd((unsigned long )mm->pgd);
+    if (old_task && old_task->mm == current->mm)
+        return;
+
+    if(current->mm)
+        do_switch_mm(current->mm);
 }

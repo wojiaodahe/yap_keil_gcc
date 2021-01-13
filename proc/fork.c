@@ -213,6 +213,11 @@ fail_nomem:
     return retval;
 }
 
+static int copy_files(struct task_struct *tsk)
+{
+
+}
+
 static int copy_mm(unsigned long clone_flags, struct task_struct *tsk)
 {
     struct mm_struct *mm, *oldmm;
@@ -251,6 +256,7 @@ static int copy_mm(unsigned long clone_flags, struct task_struct *tsk)
     if (!mm_init(mm))
         goto fail_nomem;
 
+    memcpy((void *)mm->pgd, (void *)TLB_BASE, 4096 * 4);
     //down(&oldmm->mmap_sem);
     retval = dup_mmap(mm);
     //up(&oldmm->mmap_sem);
@@ -280,7 +286,7 @@ static int copy_mm(unsigned long clone_flags, struct task_struct *tsk)
 //good_mm:
     tsk->mm = mm;
     tsk->active_mm = mm;
-    show_mm(mm);
+    //show_mm(mm);
     return 0;
 
 free_pt:
@@ -334,13 +340,14 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start, struct pt_regs
     {
         /* This is only allowed from the boot up thread */
         if (current->pid)
-            return -EPERM;
+            return -EPERM;=
     }
 
     current->vfork_sem = &sem;
 #endif
 
-    p = alloc_task_struct();
+    //p = alloc_task_struct();
+    p = alloc_pcb();
     if (!p)
         goto fork_out;
 
@@ -531,4 +538,9 @@ bad_fork_cleanup_count:
 //bad_fork_free:
     free_task_struct(p);
     goto fork_out;
+}
+
+int do_sys_fork(struct pt_regs *regs)
+{
+    return do_fork(0, 0, regs, 0x2000);
 }
