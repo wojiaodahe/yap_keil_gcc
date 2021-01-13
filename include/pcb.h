@@ -6,7 +6,7 @@
 #include "config.h"
 #include "wait.h"
 #include "mm.h"
-
+#include "ptrace.h"
 #include "printk.h"
 
 #define disable_schedule(x)	enter_critical()
@@ -29,6 +29,7 @@ typedef struct _heap_slab
 
 struct task_struct
 {
+	struct pt_regs	regs;
 	unsigned int sp;
 	unsigned int sp_size;
 	unsigned int sp_bottom;

@@ -140,127 +140,109 @@ halt_loop:
     b   halt_loop
 
 HandleIRQ:
-	STMFD   SP!, {R1-R3}			@ We will use R1-R3 as temporary registers
-@----------------------------------------------------------------------------
-@   R1--SP
-@	R2--PC 
-@   R3--SPSR
-@------------------------------------------------------------------------
-	MOV     R1, SP
-	ADD     SP, SP, #12             @Adjust IRQ stack pointer
-	SUB     R2, LR, #4              @Adjust PC for return address to task
+	stmfd	sp!, {r0}
+	ldr		r0, =current
+	ldr		r0, [r0]
 
-	MRS     R3, SPSR				@ Copy SPSR (Task CPSR)
-	
+	add 	r0, r0, #4
+	stmia	r0!, {r1-r12}
 
-	@CHANGE_TO_SYS       @??????? SYS ??????????????????????????????
-    msr     CPSR_cxsf, #(DISABLE_FIQ | DISABLE_IRQ | SYS_MOD)
+	mov		r1, sp
+	add		sp, sp, #4
+	sub		r3, lr, #4
+	mrs		r2, spsr
+    
+	msr     CPSR_cxsf, #(DISABLE_FIQ | DISABLE_IRQ | SYS_MOD)
 
-	STMFD   SP!, {R2}				@ Push task''s PC 
-	STMFD	sp!, {R3}				@ Push Task''s cpsr
-	STMFD   SP!, {R4-R12, LR}		@ Push task''s LR,R12-R4
-	
-	LDMFD   R1!, {R4-R6}			@ Load Task''s R1-R3 from IRQ stack 
-	STMFD   SP!, {R4-R6}			@ Push Task''s R1-R3 to SYS stack
-	STMFD   SP!, {R0}			    @ Push Task''s R0 to SYS stack
- 	
-	ldr r0, =current@
-	ldr r0, [r0]
-	str sp, [r0]
-	
+	stmia	r0!, {r13-r14}
+	stmia	r0!, {r2-r3}
+
+	sub		r0, r0, #68
+	ldmfd	r1, {r2}
+	stmia	r0, {r2}
+
     bl common_irq_handler
 
 	bl disable_irq	
 	
-	ldmfd	sp!, {r0 - r12}
-	ldmfd	sp!, {r14}
-	stmfd	sp!, {r0}
-	mov 	r0,	 sp
-	add		sp,  sp, #12
+	ldr		r0, =current
+	ldr		r0, [r0]
+	add		r0, r0, #4
+	ldmia	r0!, {r1-r14}
 	
 	msr     CPSR_cxsf, #(DISABLE_FIQ | DISABLE_IRQ | FIQ_MOD)
 
 	mov 	sp, r0
-	ldmfd	sp!, {r0}
-	ldmfd	sp!, {r14}
-	
-   	MSR		SPSR_cxsf, R14
-	LDMFD 	SP!, {PC}^
+	sub 	r0, r0, #60
+	ldmia	r0, {r0}
+	ldmia	sp!, {r14}
+   	msr		SPSR_cxsf, R14
+	ldmia	sp!, {pc}^	
 
-
-__int_schedule:               @???????????????????r0 - r12 ???cpsr??????????
-	LDR		R0, =current
-	LDR		R0, [R0]
-	LDR		SP, [R0]
-
-	ldmfd	sp!, {r0 - r12}
-	ldmfd	sp!, {r14}
-	stmfd	sp!, {r0}
-	mov 	r0,	 sp
-	add		sp,  sp, #12
+__int_schedule:               
+	ldr		r0, =current
+	ldr		r0, [r0]
+	add		r0, r0, #4
+	ldmia	r0!, {r1-r14}
 	
 	msr     CPSR_cxsf, #(DISABLE_FIQ | DISABLE_IRQ | FIQ_MOD)
 
 	mov 	sp, r0
-	ldmfd	sp!, {r0}
-	ldmfd	sp!, {r14}
-	
-   	MSR		SPSR_cxsf, R14
-	LDMFD 	SP!, {PC}^
+	sub 	r0, r0, #60
+	ldmia	r0, {r0}
+	ldmia	sp!, {r14}
+   	msr		SPSR_cxsf, R14
+	ldmia	sp!, {pc}^	
 
-__soft_schedule:
-	STMFD	SP!, {LR}           @PC
-	MRS		R14,  CPSR       	@Push CPSR
-	STMFD	SP!, {R14}	
-	STMFD	SP!, {R0-R12, LR}   @R0-R12 LR
-		
-	LDR		R0, =current
-	LDR		R0, [R0]
-	STR		SP, [R0]
-	
+__soft_schedule:		
+	stmfd	sp!, {r0}
+	ldr		r0, =current
+	ldr		r0, [r0]
+
+	add		r0, r0, #4
+	stmia	r0!, {r1-r12}
+
+	ldmfd	sp!, {r1}
+	stmia	r0!, {r13-r14}
+	mrs		r3, cpsr
+	stmia	r0!, {r3}
+	stmia	r0!, {lr}
+
+	sub		r0, r0, #68
+	stmia	r0!, {r1}
+
+
 	LDR		R0, =next_run
 	LDR		R1, =current
 	LDR		R0, [R0]
 	STR		R0, [R1]
 
-	LDR		R0, =next_run
-	LDR		R0, [R0]
-	LDR		SP, [R0]
-	
-  	ldmfd	sp!, {r0 - r12}
-	ldmfd	sp!, {r14}
-	stmfd	sp!, {r0}
-	mov 	r0,	 sp
-	add		sp,  sp, #12
+	add		r0, r0, #4
+	ldmia	r0!, {r1-r14}
 	
 	msr     CPSR_cxsf, #(DISABLE_FIQ | DISABLE_IRQ | FIQ_MOD)
 
 	mov 	sp, r0
-	ldmfd	sp!, {r0}
-	ldmfd	sp!, {r14}
-	
-   	MSR		SPSR_cxsf, R14
-	LDMFD 	SP!, {PC}^
+	sub 	r0, r0, #60
+	ldmia	r0, {r0}
+	ldmia	sp!, {r14}
+   	msr		SPSR_cxsf, R14
+	ldmia	sp!, {pc}^	
 
 OS_Start:
-	LDR		R0, =current
-	LDR		R0, [R0]
-	LDR		SP, [R0]
-
-	ldmfd	sp!, {r0 - r12}
-	ldmfd	sp!, {r14}
-	stmfd	sp!, {r0}
-	mov 	r0,	 sp
-	add		sp,  sp, #12
+	ldr		r0, =current
+	ldr		r0, [r0]
+	add		r0, r0, #4
+	ldmia	r0!, {r1-r14}
 	
 	msr     CPSR_cxsf, #(DISABLE_FIQ | DISABLE_IRQ | FIQ_MOD)
 
 	mov 	sp, r0
-	ldmfd	sp!, {r0}
-	ldmfd	sp!, {r14}
-	
-   	MSR		SPSR_cxsf, R14
-	LDMFD 	SP!, {PC}^
+	sub 	r0, r0, #60
+	ldmia	r0, {r0}
+	ldmia	sp!, {r14}
+   	msr		SPSR_cxsf, R14
+	ldmia	sp!, {pc}^	
 
 HandleSWI:
 	STMFD   SP!, {R1-R3}			@ We will use R1-R3 as temporary registers

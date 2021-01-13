@@ -5,8 +5,8 @@ struct pt_regs {
 	long uregs[18];
 };
 
-#define ARM_cpsr	uregs[16]
-#define ARM_pc		uregs[15]
+#define ARM_pc		uregs[16]
+#define ARM_cpsr	uregs[15]
 #define ARM_lr		uregs[14]
 #define ARM_sp		uregs[13]
 #define ARM_ip		uregs[12]

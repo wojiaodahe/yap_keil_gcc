@@ -42,6 +42,27 @@ extern unsigned int OSIntNesting;
 				*(volatile unsigned int *)(sp)=(unsigned int)(args);			\
 		}while(0)
 
+void DO_INIT_CONTEXT(struct pt_regs *regs, unsigned long fn, void *args, unsigned long lr, unsigned long cpsr, unsigned long sp, unsigned long pt_base)
+{
+    regs->ARM_pc = fn;
+    regs->ARM_cpsr = cpsr;
+    regs->ARM_lr = lr;
+    regs->ARM_sp = sp;
+    regs->ARM_r0 = 0xa5;
+    regs->ARM_r1 = 1;
+    regs->ARM_r2 = 2;
+    regs->ARM_r3 = 3;
+    regs->ARM_r4 = 4;
+    regs->ARM_r5 = 5;
+    regs->ARM_r6 = 6;
+    regs->ARM_r7 = 7;
+    regs->ARM_r8 = 8;
+    regs->ARM_r9 = 9;
+    regs->ARM_r10 = 10;
+    regs->ARM_fp = 11;
+    regs->ARM_ip = 12;
+}
+
 void *get_process_sp()
 {
 	void *tmp;
@@ -103,7 +124,7 @@ int kernel_thread(int (*f)(void *), void *args)
 	pcb->pwd  		        = current->pwd;
 	memcpy(pcb->filp, current->filp, sizeof (pcb->filp));
 	
-	DO_INIT_SP(pcb->sp, f, args, thread_exit, 0x1f & get_cpsr(), 0);
+	DO_INIT_CONTEXT(&pcb->regs, f, args, thread_exit, 0x1f & get_cpsr(), pcb->sp, 0);
 
     pcb->mm = current->mm;
 
@@ -148,7 +169,7 @@ int kernel_thread_prio(int (*f)(void *), void *args, unsigned int prio)
 	pcb->pwd  		= current->pwd;
 	memcpy(pcb->filp, current->filp, sizeof (pcb->filp));
 	
-	DO_INIT_SP(pcb->sp, f, args, thread_exit, 0x1f & get_cpsr(), 0);
+	DO_INIT_CONTEXT(&pcb->regs, f, args, thread_exit, 0x1f & get_cpsr(), pcb->sp, 0);
 
     pcb->mm = current->mm;
 	enter_critical();
@@ -190,7 +211,7 @@ struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
 	pcb->pwd  		        = current->pwd;
 	//memcpy(pcb->filp, current->filp, sizeof (pcb->filp));
 	
-	DO_INIT_SP(pcb->sp, f, args, thread_exit, 0x1f & get_cpsr(), 0);
+	DO_INIT_CONTEXT(&pcb->regs, f, args, thread_exit, 0x1f & get_cpsr(), pcb->sp, 0);
 
     return pcb;
 }
