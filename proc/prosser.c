@@ -6,6 +6,7 @@
 int copy_thread(int nr, unsigned long clone_flags, unsigned long esp, unsigned long unused, struct task_struct *p, struct pt_regs *regs)
 {
     memcpy(&p->regs, regs, sizeof (struct pt_regs));
+    p->regs.ARM_r0 = 0;
     return 0;
 }
 

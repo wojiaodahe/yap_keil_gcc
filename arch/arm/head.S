@@ -305,7 +305,7 @@ sys_fork:
 
 	sub		r0, r0, #68
 
-	stmfd	sp!, {r0-r12}
+	stmfd	sp!, {r1-r12}
 	mrs		r3,  cpsr
 	stmfd	sp!, {r3}
 	stmfd	sp!, {lr}
@@ -315,7 +315,7 @@ sys_fork:
 	ldmfd	sp!, {lr}
 	ldmfd	sp!, {r3}
    	msr		CPSR_cxsf, r3
-	ldmfd	sp!, {r0-r12}
+	ldmfd	sp!, {r1-r12}
 
 
 	mov 	pc,  lr

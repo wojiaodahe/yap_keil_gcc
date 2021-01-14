@@ -110,7 +110,7 @@ inline int arch_mmap(unsigned long vaddr, unsigned long paddr, unsigned long siz
     return 0;
 }
 
-extern void sys_fork(struct pt_regs *);
+extern int sys_fork(struct pt_regs *);
 int test_swich_mm_task0(void *arg)
 {
     struct pt_regs reg;
@@ -121,16 +121,15 @@ int test_swich_mm_task0(void *arg)
     
     //ret = do_fork(0, 0, 0, 0x2000);
 
-    sys_fork(&reg);
+    ret = sys_fork(&reg);
 
-    if (ret > 0)
-        printk("parent\n");
-    else if (ret == 0)
-        printk("chiled\n");
     
     while (1)
     {
-        printk("1234\n");
+        if (ret > 0)
+            printk("parent\n");
+        else if (ret == 0)
+            printk("chiled\n");
         schedule();
     }
 
