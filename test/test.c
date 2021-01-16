@@ -204,8 +204,8 @@ void test_switch_mm(void)
     struct page *p;
     struct mm_struct *mm;
 
-    current = test_task_struct[0];
     test_task_struct[0] = tmp_test_create_thread(test_swich_mm_task0, NULL);
+    current = test_task_struct[0];
 //    mm = test_switch_mm_alloc_mm();
  //   test_task_struct[0]->mm = mm;
 

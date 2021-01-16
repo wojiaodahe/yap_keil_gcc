@@ -21,9 +21,9 @@ extern void __int_schedule(void);
 extern struct task_struct *alloc_pcb(void);
 extern void *alloc_stack(void);
 
-struct task_struct *next_run;
-struct task_struct *current;
-struct task_struct *old_task;
+struct task_struct *next_run = NULL;
+struct task_struct *current = NULL;
+struct task_struct *old_task = NULL;
 static struct proc_list_head proc_list[PROCESS_PRIO_BUTT];
 static struct task_struct sleep_proc_list_head;
 static unsigned int OS_TICKS = 0;
@@ -183,13 +183,13 @@ int kernel_thread_prio(int (*f)(void *), void *args, unsigned int prio)
 struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
 { 
     unsigned long flags;
-	unsigned int sp;
+	unsigned long sp;
 	
 	struct task_struct *pcb = (struct task_struct *)alloc_pcb();
 	if (!pcb)
 		return NULL;
 
-	if((sp = (unsigned int)get_process_sp()) == 0)
+	if((sp = (unsigned long)get_process_sp()) == 0)
 	{
 		printk("kernel_thread get sp_space error\r\n");
 		return NULL;
@@ -208,30 +208,75 @@ struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
 	pcb->pid 		        = pid++;
 	pcb->time_slice         = 5;
 	pcb->ticks 		        = 5;
-	pcb->root 		        = current->root;
-	pcb->pwd  		        = current->pwd;
+	//pcb->root 		        = current->root;
+	//pcb->pwd  		        = current->pwd;
 	//memcpy(pcb->filp, current->filp, sizeof (pcb->filp));
+    
+    if (current)
+        sp = current->current_max_sp + TASK_STACK_SIZE;
+    else 
+        sp = 0x80000000;
     
     current = pcb;
     pcb->mm = test_switch_mm_alloc_mm();
     memcpy((void *)pcb->mm->pgd, (void *)TLB_BASE, 4096 * 4);
-    do_brk(0x80000000, 0x3000);
-    pcb->sp = 0x80000000 + 0x2000;
 
+    do_brk(sp, TASK_STACK_SIZE);
+    pcb->sp = sp + TASK_STACK_SIZE;
+    pcb->sp_bottom = sp;
+
+    current->current_max_sp = sp;
    
 	
 	DO_INIT_CONTEXT(&pcb->regs, f, args, thread_exit, 0x1f & get_cpsr(), pcb->sp, 0);
+	
 
     return pcb;
 }
 
+extern struct inode *root_inode;
+int create_init_thread(int (*f)(void *), void *args)
+{ 
+    unsigned long flags;
+	unsigned long sp;
+	
+	struct task_struct *pcb = (struct task_struct *)alloc_pcb();
+	if (!pcb)
+		return NULL;
+    
+    current = pcb;
+
+    pcb->preempt_count      = 0;
+
+    pcb->prio               = PROCESS_PRIO_NORMAL;
+	pcb->pid 		        = 0;
+	pcb->time_slice         = 5;
+	pcb->ticks 		        = 5;
+    
+    sp = 0x80000000;
+    
+    pcb->mm = test_switch_mm_alloc_mm();
+    memcpy((void *)pcb->mm->pgd, (void *)TLB_BASE, 4096 * 4);
+
+    do_brk(sp, TASK_STACK_SIZE);
+    pcb->sp = sp + TASK_STACK_SIZE;
+    pcb->sp_bottom = sp;
+
+    current->current_max_sp = sp;
+	DO_INIT_CONTEXT(&pcb->regs, f, args, thread_exit, 0x1f & get_cpsr(), pcb->sp, 0);
+    
+    pcb_list_add(&proc_list[pcb->prio].head, pcb);
+    
+
+    return 0;
+}
 
 struct task_struct *OS_GetNextReady(void)
 {
     int prio;
     struct task_struct *tmp;
 
-    return tmp_get_next_ready();
+    //return tmp_get_next_ready();
     
     for (prio = 0; prio < PROCESS_PRIO_BUTT; prio++)
     {
@@ -245,6 +290,7 @@ struct task_struct *OS_GetNextReady(void)
             if (tmp->flags == PROCESS_READY)
             {
                 proc_list[prio].current = tmp;
+                old_task = current;
                 return tmp;
             }
         } while (tmp != proc_list[prio].current);
@@ -279,13 +325,13 @@ void OS_Sched()
     //if (preempt_count > 0)
     //    return;
 
-   // kernel_disable_irq(); 
+    kernel_disable_irq(); 
     
     next_run = OS_GetNextReady();
 	
 	__soft_schedule();
     
-    //kernel_enable_irq();
+    kernel_enable_irq();
 }
 
 void schedule(void)
@@ -399,7 +445,7 @@ long do_wait_for_common(struct completion *x, long timeout, unsigned int state)
     }
 
     x->done--;
-    return timeout ?: 1;
+    return timeout ? 1 : 0;
 }
 
 long wait_for_common(struct completion *x, long timeout, int state)
@@ -742,8 +788,6 @@ int OS_Init(void)
     int prio;
 	int ret;
 
-	current = &proc_list[PROCESS_PRIO_NORMAL].head;
-
     sleep_proc_list_head.pid = -1;
     sleep_proc_list_head.next_sleep_proc = &sleep_proc_list_head;
     sleep_proc_list_head.prev_sleep_proc = &sleep_proc_list_head;
@@ -765,6 +809,13 @@ int OS_Init(void)
 	
     s3c24xx_init_irq();
 	s3c24xx_init_tty();
+	
+    ret = create_init_thread(OS_INIT_PROCESS, (void *)0);
+	if (ret < 0)
+	{
+		printk("create OS_INIT_PROCESS error\n");
+		panic();
+	}
 	
     ret = vfs_init();
 	if (ret < 0)
@@ -795,12 +846,6 @@ int OS_Init(void)
     	panic();
     }
 
-	ret = kernel_thread(OS_INIT_PROCESS, (void *)0);
-	if (ret < 0)
-	{
-		printk("create OS_INIT_PROCESS error\n");
-		panic();
-	}
 	
 	current = proc_list[PROCESS_PRIO_NORMAL].head.next;
 

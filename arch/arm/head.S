@@ -296,11 +296,11 @@ syscall:
 	mov pc, lr
 
 sys_fork:
-	stmia	r0!, {R0-R14}   	@R0-R12 LR
+	stmia	r0!, {R0-R14}   	
 	stmfd	sp!, {r1}
-	mrs		R1,  CPSR       	@Push CPSR
+	mrs		R1,  CPSR       	
 	stmia	r0!, {R1}	
-	stmia	r0!, {LR}           @PC
+	stmia	r0!, {LR}           
 	ldmfd	sp!, {r1}
 
 	sub		r0, r0, #68

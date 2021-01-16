@@ -30,9 +30,10 @@ typedef struct _heap_slab
 struct task_struct
 {
 	struct pt_regs	regs;
-	unsigned int sp;
-	unsigned int sp_size;
-	unsigned int sp_bottom;
+	unsigned long sp;
+	unsigned long sp_size;
+	unsigned long sp_bottom;
+	unsigned long current_max_sp;
     
 	int did_exec;
 

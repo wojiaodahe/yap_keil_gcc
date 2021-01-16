@@ -7,18 +7,17 @@
 #include "error.h"
 #include "slab.h"
 #include "mm.h"
- 
 
-extern void tmp_add_task_struct(struct task_struct *tsk);
-extern struct task_struct *test_task_struct[2];
+extern void cpu_arm920_set_pgd(unsigned long pgd);
+ 
 void wake_up_process(struct task_struct * p)
 {
-    test_task_struct[1] = p;
+
 }
 
 void switch_current_mm(void)
 {
-    if (old_task && old_task->mm == current->mm)
+     if (old_task && old_task->mm == current->mm)
         return;
 
     if(current->mm)
