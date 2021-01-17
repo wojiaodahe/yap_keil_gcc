@@ -19,7 +19,7 @@ void kernel_disable_irq()
         return;
         
     disable_irq();
-}
+ }
 
 void kernel_enable_irq()
 {

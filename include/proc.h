@@ -33,6 +33,7 @@ extern void OS_Start(void);
 extern void set_current_state(unsigned int state);
 extern void set_task_state(void *task, unsigned int state);
 extern int kernel_thread_prio(int (*f)(void *), void *args, unsigned int prio);
+extern unsigned int get_new_pid(void);
 
 #endif
 

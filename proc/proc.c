@@ -93,6 +93,18 @@ void thread_exit(void)
     }
 }
 
+unsigned int get_new_pid(void)
+{
+    return pid++;
+}
+
+void add_task_struct(struct task_struct *p)
+{
+	enter_critical();
+	pcb_list_add(&proc_list[p->prio].head, p);
+	exit_critical();
+}
+
 int kernel_thread(int (*f)(void *), void *args)
 { 
     unsigned long flags;
@@ -287,7 +299,7 @@ struct task_struct *OS_GetNextReady(void)
             tmp = tmp->next;
             if (tmp->pid == -1)
                 continue;
-            if (tmp->flags == PROCESS_READY)
+            if (tmp->state == PROCESS_READY)
             {
                 proc_list[prio].current = tmp;
                 old_task = current;
@@ -301,6 +313,28 @@ struct task_struct *OS_GetNextReady(void)
     panic();
 
     return tmp;
+}
+
+void dump_all_task(void)
+{
+    int prio;
+    struct task_struct *tmp;
+
+    //return tmp_get_next_ready();
+    
+    for (prio = 0; prio < PROCESS_PRIO_BUTT; prio++)
+    {
+        tmp = proc_list[prio].current;
+        
+        do
+        {
+            tmp = tmp->next;
+            if (tmp->pid == -1)
+                continue;
+
+            printk("p: %p p->pid: %d p->state: %x p->flags %x\n", tmp, tmp->pid, tmp->state, tmp->flags);
+        } while (tmp != proc_list[prio].current);
+    }
 }
 
 void OS_IntSched()
@@ -350,7 +384,7 @@ void __wake_up(wait_queue_t *wq)
 void prepare_to_wait(wait_queue_t *wq, unsigned int state)
 {
     wq->priv = current;
-    current->flags |= state;
+    current->state |= state;
 }
 
 void finish_wait(wait_queue_t *wq)
@@ -361,7 +395,7 @@ void finish_wait(wait_queue_t *wq)
         return;
 
     pcb = wq->priv;
-    pcb->flags = PROCESS_READY;
+    pcb->state = PROCESS_READY;
 }
 
 void __wake_up_interruptible(wait_queue_t *wq)
@@ -373,7 +407,7 @@ void __wake_up_interruptible(wait_queue_t *wq)
         return;
 
     pcb = wq->priv;
-    pcb->flags = PROCESS_READY;
+    pcb->state = PROCESS_READY;
 }
 
 void __init_waitqueue_head(wait_queue_t *wq, char *name)
@@ -526,7 +560,7 @@ int OS_IDLE_PROCESS(void *arg)
 {
 	while (1)
 	{
-		printk("OS Idle Process\r\n");
+		//printk("OS Idle Process\r\n");
 		OS_Sched();
 	}
 }
@@ -558,7 +592,7 @@ void process_sleep(unsigned int sec)
 {
 	enter_critical();
 
-	current->flags |= PROCESS_SLEEP;
+	current->state |= PROCESS_SLEEP;
 	current->sleep_time = sec * HZ;
 
     add_current_to_sleep_list();
@@ -571,7 +605,7 @@ void process_msleep(unsigned int m)
 {
 	enter_critical();
 
-	current->flags |= PROCESS_SLEEP;
+	current->state |= PROCESS_SLEEP;
 	current->sleep_time = m * HZ / 1000;
 	if (!current->sleep_time)
 		current->sleep_time = 1;
@@ -588,7 +622,7 @@ void set_task_state(void *task, unsigned int state)
 
 	enter_critical();
 
-	tsk->flags = state;
+	tsk->state = state;
 
 	exit_critical();
 }
@@ -602,7 +636,7 @@ void clr_task_status(unsigned int status)
 {
 	enter_critical();
 
-	current->flags &= ~(status);
+	current->state &= ~(status);
 
 	exit_critical();
 }
@@ -618,7 +652,7 @@ void update_sleeping_proc(void)
             tmp->sleep_time--;
         if (tmp->sleep_time == 0)
         {
-            tmp->flags &= ~(PROCESS_SLEEP);
+            tmp->state &= ~(PROCESS_SLEEP);
             tmp->next_sleep_proc->prev_sleep_proc = tmp->prev_sleep_proc; 
             tmp->prev_sleep_proc->next_sleep_proc = tmp->next_sleep_proc;
         }
@@ -772,12 +806,20 @@ int OS_INIT_PROCESS(void *argv)
     
     OS_RUNNING = 1;
     exit_critical();
+    
+    struct pt_regs reg;
+    ret = sys_fork(&reg);
+
 
 #endif
 	while (1)
 	{
-		//printk("OS Init Process\r\n");
-		OS_Sched();
+        if (current->pid == 0);
+		    printk("OS Init Process\r\n");
+        if (current->pid == 9)
+		    printk("Chiled Process\r\n");
+
+        ssleep(1);
 	}
     
     //return 0;

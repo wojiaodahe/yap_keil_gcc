@@ -11,6 +11,7 @@
 #include "slab.h"
 #include "mm.h"
 #include "fs.h"
+#include "proc.h"
 
 /* SLAB cache for signal_struct structures (tsk->sig) */
 kmem_cache_t *sigact_cachep;
@@ -376,7 +377,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start, struct pt_regs
 
     p->did_exec = 0;
     //p->swappable = 0;
-    p->state = TASK_UNINTERRUPTIBLE;
+    //p->state = TASK_UNINTERRUPTIBLE;
 
     copy_flags(clone_flags, p);
     p->pid = get_pid(clone_flags);
@@ -482,7 +483,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start, struct pt_regs
 	 *
 	 * Let it rip!
 	 */
-    retval = p->pid;
+    retval = get_new_pid();
+    p->pid = retval;
 #if 0
     p->tgid = retval;
     INIT_LIST_HEAD(&p->thread_group);
@@ -503,7 +505,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start, struct pt_regs
     if (p->ptrace & PT_PTRACED)
         send_sig(SIGSTOP, p, 1);
 #endif
-    wake_up_process(p); /* do this last */
+    //wake_up_process(p); /* do this last */
+    add_task_struct(p);
     ++total_forks;
 
 fork_out:
