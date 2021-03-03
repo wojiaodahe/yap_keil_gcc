@@ -29,6 +29,9 @@ int load_aout_binary(struct linux_binprm * bprm, struct pt_regs * regs)
     unsigned long  text_addr, map_size;
 	struct exec ex;
 
+
+    return 0;
+
     ex = *((struct exec *) bprm->buf);
     map_size = ex.a_text + ex.a_data;
 
@@ -52,4 +55,16 @@ int load_aout_binary(struct linux_binprm * bprm, struct pt_regs * regs)
     }
 
     return 0;
+}
+
+
+static struct linux_binfmt aout_format = 
+{
+    .load_binary = load_aout_binary,
+};
+
+extern void linux_binfmt_register(struct linux_binfmt *fmt);
+void aout_fmt_init(void)
+{
+    linux_binfmt_register(&aout_format);
 }

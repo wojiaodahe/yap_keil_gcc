@@ -92,8 +92,8 @@ int prepare_binprm(struct linux_binprm *bprm)
 
     mode = inode->i_mode;
     /* Huh? We had already checked for MAY_EXEC, WTF do we check this? */
-    if (!(mode & 0111)) /* with at least _one_ execute bit set */
-        return -EACCES;
+    //if (!(mode & 0111)) /* with at least _one_ execute bit set */
+        //return -EACCES;
     if (bprm->file->f_op == NULL)
         return -EACCES;
 
@@ -103,9 +103,36 @@ int prepare_binprm(struct linux_binprm *bprm)
 
 struct file *open_exec(char *name)
 {
+    int ret;
     struct file *file = NULL;
+    struct inode *file_inode = NULL;
 
+    file = (struct file *)kmalloc(sizeof (struct file));
+    if (!file)
+        return -ENOMEM;
+
+    file->f_count = 1;
+    ret = open_namei(name, O_RDONLY, 0, &file_inode, NULL);
+    if (ret || !file_inode)
+        goto err_open;
+
+    file->f_inode = file_inode;
+    file->f_pos = 0;
+    file->f_op = NULL;
+    if (file_inode->i_op)
+        file->f_op = file_inode->i_op->default_file_ops;
+        
+    ret = file->f_op->open(file_inode, file);
+    if (ret < 0)
+        goto err_open;
+    
     return file;
+
+err_open:
+    memset(file, 0, sizeof (*file));
+    kfree(file);
+
+    return NULL;
 }
 
 int do_execve(char *filename, char **argv, char **envp, struct pt_regs *regs)
@@ -184,3 +211,13 @@ out:
     return retval;
 }
 #endif
+
+void linux_binfmt_register(struct linux_binfmt *fmt)
+{
+    fmt->next = NULL;
+
+    if (formats)    
+        formats->next = fmt;
+    else
+        formats = fmt;
+}

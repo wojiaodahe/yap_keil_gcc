@@ -431,16 +431,6 @@
               <FilePath>./proc/preempt.c</FilePath>
             </File>
             <File>
-              <FileName>binfmt_aout.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>./proc/binfmt_aout.c</FilePath>
-            </File>
-            <File>
-              <FileName>elf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>./proc/elf.c</FilePath>
-            </File>
-            <File>
               <FileName>exec.c</FileName>
               <FileType>1</FileType>
               <FilePath>./proc/exec.c</FilePath>
@@ -464,6 +454,11 @@
               <FileName>sched.c</FileName>
               <FileType>1</FileType>
               <FilePath>./proc/sched.c</FilePath>
+            </File>
+            <File>
+              <FileName>binfmt_elf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./proc/binfmt_elf.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1351,16 +1346,6 @@
               <FilePath>./proc/preempt.c</FilePath>
             </File>
             <File>
-              <FileName>binfmt_aout.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>./proc/binfmt_aout.c</FilePath>
-            </File>
-            <File>
-              <FileName>elf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>./proc/elf.c</FilePath>
-            </File>
-            <File>
               <FileName>exec.c</FileName>
               <FileType>1</FileType>
               <FilePath>./proc/exec.c</FilePath>
@@ -1384,6 +1369,11 @@
               <FileName>sched.c</FileName>
               <FileType>1</FileType>
               <FilePath>./proc/sched.c</FilePath>
+            </File>
+            <File>
+              <FileName>binfmt_elf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>./proc/binfmt_elf.c</FilePath>
             </File>
           </Files>
         </Group>
