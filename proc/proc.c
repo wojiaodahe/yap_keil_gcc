@@ -194,6 +194,7 @@ int kernel_thread_prio(int (*f)(void *), void *args, unsigned int prio)
 	return 0;
 }
 
+extern struct mm_struct *test_switch_mm_alloc_mm(void);
 struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
 { 
 	unsigned long sp;
@@ -207,7 +208,7 @@ struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
 		printk("kernel_thread get sp_space error\r\n");
 		return NULL;
 	}
-
+ 
 	printk("get_pcb_addr: %x\r\n", (unsigned int)pcb);
 
 	sp 				        = (sp + TASK_STACK_SIZE);
