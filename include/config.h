@@ -43,6 +43,7 @@ struct reserved_area
 
 extern unsigned long get_page_table_offset(void);
 extern unsigned long get_phy_memory_size(void);
+extern unsigned long get_reserved_area(struct reserved_area **r);
 
 #endif 
 

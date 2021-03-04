@@ -1,7 +1,7 @@
 #include "bootmem.h"
 #include "page.h"
 #include "mmzone.h"
-
+#include "printk.h"
 #include "mm.h"
 
 void reserve_bootmem_core(bootmem_data_t *bdata, unsigned long addr, unsigned long size)

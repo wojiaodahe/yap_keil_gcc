@@ -696,8 +696,8 @@ void kmem_cache_init(void)
     cache_cache.firstnotfull = &cache_cache.slabs;
     cache_cache.objsize = sizeof(kmem_cache_t);
     cache_cache.flags = SLAB_NO_REAP;
-    cache_cache.spinlock = SPIN_LOCK_UNLOCKED;
     cache_cache.colour_off = L1_CACHE_BYTES;
+    memset(&cache_cache.spinlock, 0, sizeof (spinlock_t));
     strcpy(cache_cache.name, "kmem_cache");
 
     //init_MUTEX(&cache_chain_sem);

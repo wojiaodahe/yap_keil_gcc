@@ -40,7 +40,7 @@ static struct reserved_area RA[] =
 
 unsigned long get_reserved_area(struct reserved_area **r)
 {
-    *r = &RA;
+    *r = &RA[0];
 
     return 2;
 }

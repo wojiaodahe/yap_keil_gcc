@@ -10,5 +10,7 @@ typedef struct bootmem_data {
 	unsigned long last_pos;
 } bootmem_data_t;
 
+extern void reserve_bootmem_core(bootmem_data_t *bdata, unsigned long addr, unsigned long size);
+
 #endif
 

@@ -2,7 +2,7 @@
 #include "page.h"
 #include "mm.h"
 #include "memory.h"
-
+#include "bootmem.h"
 #include "config.h"
 
 /*

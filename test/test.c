@@ -140,7 +140,7 @@ int test_swich_mm_task1(void *arg)
 {
     int ret;
 
-    //ret = do_fork(0, 0, 0, 0x2000);
+    ret = do_fork(0, 0, 0, 0x2000);
 
     if (ret > 0)
         *(volatile unsigned int *)0x40000000 = 0x55;
@@ -200,9 +200,11 @@ struct mm_struct *test_switch_mm_alloc_mm(void)
 
 void test_switch_mm(void)
 {
+#if 0
     void *addr;
     struct page *p;
     struct mm_struct *mm;
+#endif
 
     test_task_struct[0] = tmp_test_create_thread(test_swich_mm_task0, NULL);
     current = test_task_struct[0];

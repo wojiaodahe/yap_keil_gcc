@@ -416,3 +416,4 @@ cpu_arm920_clean_dentry_and_drain_Wb:
 	mcr	p15, 0, r0, c7, c10, 4		@ drain WB
 
 	mov	pc, lr
+

@@ -2,6 +2,8 @@
 #include "printk.h"
 #include "blk.h"
 #include "fs.h"
+#include "inet.h"
+#include "kmalloc.h"
 #include "error.h"
 
 void romfs_read_inode(struct inode *i);

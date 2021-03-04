@@ -89,6 +89,7 @@ extern void netif_wake_queue(struct net_device *ndev);
 extern int netif_tx_queue(struct net_device *ndev, struct sk_buff *skb);
 extern void netif_stop_queue(struct net_device *ndev);
 extern void netif_rx(struct sk_buff *skb);
+extern void netif_init(void);
 
 #endif /* INCLUDE_NETDEVICE_H_ */
 

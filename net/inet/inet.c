@@ -1,6 +1,7 @@
 #include "inet_socket.h"
 #include "netdevice.h"
 #include "arp.h"
+#include "ip.h"
 #include "inet.h"
 
 #define BigLittleSwap16(n) ((((unsigned short)((n) & 0xff)) << 8) | (((n) & 0xff00) >> 8))

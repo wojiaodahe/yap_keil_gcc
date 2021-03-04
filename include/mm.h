@@ -251,6 +251,8 @@ struct mm_struct
 
 extern struct mm_struct init_mm;
 
+void paging_init(void);
+void mem_init(unsigned long START, unsigned long END);
 extern struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr);
 extern struct vm_area_struct *find_vma_prev(struct mm_struct *mm, unsigned long addr, struct vm_area_struct **pprev);
 extern int make_pages_present(unsigned long addr, unsigned long end);

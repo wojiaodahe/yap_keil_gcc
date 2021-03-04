@@ -15,9 +15,11 @@
 #include "timer.h"
 #include "completion.h"
 #include "sched.h"
-
+#include "fork.h"
 #include "mm.h"
 #include "page.h"
+#include "slab.h"
+
 
 int  test_get_ticks(void *p)
 {
@@ -331,9 +333,6 @@ extern int s3c24xx_init_tty(void);
 extern int test_platform(void);
 int kernel_main()
 {
-	struct page *page0;
-
-
 	//phy_mem_init();
 	//s3c24xx_init_tty();
 	paging_init();
@@ -351,7 +350,7 @@ int kernel_main()
 		;
 #endif
 
-	init_key_irq();
+	//init_key_irq();
 	
 	OS_Init();
 	OS_Start();

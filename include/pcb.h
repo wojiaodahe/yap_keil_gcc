@@ -105,5 +105,8 @@ struct proc_list_head
     unsigned int proc_cnt;
 };
 
+extern struct task_struct *alloc_pcb(void);
+extern void add_task_struct(struct task_struct *p);
+
 #endif 
 

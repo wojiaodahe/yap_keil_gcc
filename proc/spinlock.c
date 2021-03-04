@@ -44,6 +44,16 @@ void raw_spin_unlock_irq(raw_spinlock_t *lock)
     preempt_enable(); 
 }
 
+void raw_spin_lock_irqsave(raw_spinlock_t *lock, unsigned long *flags)
+{
+
+}
+ 
+void raw_spin_unlock_irqrestore(raw_spinlock_t *lock, unsigned long flags)
+{
+
+}
+
 void raw_spin_lock_init(raw_spinlock_t *lock)
 {
     arch_spin_lock_init(&lock->raw_lock);

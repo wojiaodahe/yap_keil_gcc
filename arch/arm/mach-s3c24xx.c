@@ -5,12 +5,12 @@
 
 int s3c24xx_set_gpio_mode(unsigned int group, unsigned int bit, unsigned mode)
 {
-
+    return 0;
 }
 
 int s3c24xx_set_gpio(unsigned int group, unsigned int bit)
 {
-
+    return 0;
 }
 
 unsigned int s3c24xx_get_gpio(unsigned group, unsigned bit)
@@ -30,7 +30,7 @@ void s3c24xx_disable_irq(unsigned int irq)
 
 int s3c24xx_request_irq(unsigned int irq, unsigned int mode)
 {
-
+    return 0;
 }
 
 unsigned int s3c24xx_get_irq(void)

@@ -18,5 +18,7 @@ struct machine_desc
     struct sys_timer    *sys_timer;
 };
 
+extern void setup_machine_desc(struct machine_desc *md);
+
 #endif
 

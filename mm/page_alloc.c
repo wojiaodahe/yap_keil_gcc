@@ -68,14 +68,14 @@ static struct page *rmqueue(zone_t *zone, unsigned long order)
     free_area_t *area;
     unsigned long curr_order;
     struct list_head *head, *curr;
-    //unsigned long flags;
+    unsigned long flags;
     struct page *page;
     unsigned int index;
 
     area = zone->free_area + order;
     curr_order = order;
 
-    //spin_lock_irqsave(&zone->lock, flags);
+    spin_lock_irqsave(&zone->lock, flags);
     do
     {
         head = &area->free_list;
@@ -93,7 +93,7 @@ static struct page *rmqueue(zone_t *zone, unsigned long order)
             zone->free_pages -= 1 << order;
 
             page = expand(zone, page, index, order, curr_order, area);
-            //spin_unlock_irqrestore(&zone->lock, flags);
+            spin_unlock_irqrestore(&zone->lock, flags);
             set_page_count(page, 1);
             if (BAD_RANGE(zone, page))
                 BUG();
@@ -105,7 +105,7 @@ static struct page *rmqueue(zone_t *zone, unsigned long order)
         curr_order++;
         area++;
     } while (curr_order < MAX_ORDER);
-    //spin_unlock_irqrestore(&zone->lock, flags);
+    spin_unlock_irqrestore(&zone->lock, flags);
 
     return NULL;
 }
@@ -488,11 +488,11 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
         //printk("zone(%d): %d pages.\n", j, size);
         zone->size = size;
         zone->name = zone_names[j];
-        zone->lock = SPIN_LOCK_UNLOCKED;
         zone->zone_pgdat = pgdat;
         zone->free_pages = 0;
         zone->inactive_clean_pages = 0;
         zone->inactive_dirty_pages = 0;
+        memset(&zone->lock, 0, sizeof (zone->lock));
         memlist_init(&zone->inactive_clean_list);
         if (!size)
             continue;

@@ -1,6 +1,5 @@
-#include "string.h"
-#include "malloc.h"
-
+#include "kmalloc.h"
+#include "lib.h"
 #include "fs.h"
 #include "list.h"
 #include "common.h"

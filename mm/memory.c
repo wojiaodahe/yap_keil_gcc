@@ -1,5 +1,6 @@
 #include "mm.h"
 #include "lib.h"
+#include "bug.h"
 #include "config.h"
 #include "printk.h"
 #include "page.h"
@@ -14,15 +15,12 @@ mem_map_t *mem_map;
 unsigned long max_mapnr;
 unsigned long num_physpages;
 
-
-
+int handle_mm_fault(struct mm_struct *mm, struct vm_area_struct *vma, unsigned long address, int write_access);
 
 int phy_mem_init(void)
 {   
     int i;
     int nr;
-    unsigned long offset;
-    unsigned long *p;
     struct reserved_area *area0;
     struct reserved_area *area1;
 
@@ -203,8 +201,11 @@ skip_copy_pte_range:
 
 cont_copy_pte_range:
                 set_pte(dst_pte, pte);
-                handle_mm_fault(dst, vma, address, 1);
-                need_copy = 0;
+                if (need_copy)
+                {
+                    handle_mm_fault(dst, vma, address, 1);
+                    need_copy = 0;
+                }
 cont_copy_pte_range_noset:
                 address += PAGE_SIZE;
                 if (address >= end)

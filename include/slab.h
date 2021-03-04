@@ -175,6 +175,8 @@ typedef struct kmem_cache_s
 # define CREATE_MASK	(SLAB_HWCACHE_ALIGN | SLAB_NO_REAP | SLAB_CACHE_DMA)
 
 
+void kmem_cache_init(void);
+void kmem_cache_sizes_init(void);
 void *kmem_cache_alloc(kmem_cache_t *cachep, int flags);
 void kmem_cache_free(kmem_cache_t *cachep, void *objp);
 void kmem_freepages(kmem_cache_t *cachep, void *addr);

@@ -4,8 +4,9 @@
 #include "ptrace.h"
 
 struct mm_struct *mm_alloc(void);
-void proc_caches_init(void);
 
+extern int sys_fork(struct pt_regs *reg);
+extern void proc_caches_init(void);
 extern int do_fork(unsigned long clone_flags, unsigned long stack_start, struct pt_regs *regs, unsigned long stack_size);
 
 

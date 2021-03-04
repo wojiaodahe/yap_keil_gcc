@@ -1,8 +1,10 @@
 #include "mm.h"
 #include "arch.h"
+#include "fork.h"
 #include "kernel.h"
 #include "interrupt.h"
 #include "error.h"
+#include "inet.h"
 #include "config.h"
 #include "sched.h"
 #include "proc.h"
@@ -43,11 +45,11 @@ extern unsigned int OSIntNesting;
 				*(volatile unsigned int *)(sp)=(unsigned int)(args);			\
 		}while(0)
 
-void DO_INIT_CONTEXT(struct pt_regs *regs, unsigned long fn, void *args, unsigned long lr, unsigned long cpsr, unsigned long sp, unsigned long pt_base)
+void DO_INIT_CONTEXT(struct pt_regs *regs, int (*fn)(void *), void *args, void (*lr)(void), unsigned long cpsr, unsigned long sp, unsigned long pt_base)
 {
-    regs->ARM_pc = fn;
+    regs->ARM_pc = (unsigned long)fn;
     regs->ARM_cpsr = cpsr;
-    regs->ARM_lr = lr;
+    regs->ARM_lr = (unsigned long)lr;
     regs->ARM_sp = sp;
     regs->ARM_r0 = 0xa5;
     regs->ARM_r1 = 1;
@@ -194,7 +196,6 @@ int kernel_thread_prio(int (*f)(void *), void *args, unsigned int prio)
 
 struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
 { 
-    unsigned long flags;
 	unsigned long sp;
 	
 	struct task_struct *pcb = (struct task_struct *)alloc_pcb();
@@ -249,12 +250,11 @@ struct task_struct *tmp_test_create_thread(int (*f)(void *), void *args)
 extern struct inode *root_inode;
 int create_init_thread(int (*f)(void *), void *args)
 { 
-    unsigned long flags;
 	unsigned long sp;
 	
 	struct task_struct *pcb = (struct task_struct *)alloc_pcb();
 	if (!pcb)
-		return NULL;
+		return -ENOMEM;
     
     current = pcb;
 
@@ -842,12 +842,6 @@ int OS_Init(void)
         proc_list[prio].current = &proc_list[prio].head;
     }
 	
-	ret = system_mm_init();
-	if (ret < 0)
-	{
-		printk("system kmalloc init error\n");
-		panic();
-	}
 	
     s3c24xx_init_irq();
 	s3c24xx_init_tty();

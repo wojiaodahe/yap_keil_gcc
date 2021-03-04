@@ -2,7 +2,7 @@
 #define __ARM_PTRACE_H__
 
 struct pt_regs {
-	long uregs[18];
+	unsigned long uregs[18];
 };
 
 #define ARM_pc		uregs[16]

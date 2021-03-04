@@ -1,7 +1,9 @@
 #ifndef __VFS_H__
 #define __VFS_H__
 
+#include "fs.h"
 
+extern int open_namei(char *pathname, int flag, int mode, struct inode **res_inode, struct inode *base);
 extern int sys_open(char *name, unsigned int flag, int mode);
 extern int sys_close(unsigned int fd);
 extern int sys_read(unsigned int fd, char *buf, unsigned int count);

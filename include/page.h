@@ -114,9 +114,9 @@ extern unsigned long num_physpages;
 void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
                          unsigned long *zones_size, unsigned long zone_start_paddr,
                          unsigned long *zholes_size, struct page *lmem_map);
+extern void show_free_areas(void);
 
+extern void set_pte(pte_t *pte_table, pte_t entry);
+extern void set_pmd(pmd_t *pmd, pmd_t entry);
 
 #endif
-
-
-

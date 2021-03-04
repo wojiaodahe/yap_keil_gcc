@@ -1,9 +1,10 @@
-#include <string.h>
-
+#include "lib.h"
 #include "fs.h"
+#include "vfs.h"
 #include "error.h"
 #include "sched.h"
 #include "binfmts.h"
+#include "kmalloc.h"
 #include "common.h"
 
 static struct linux_binfmt *formats;
@@ -87,10 +88,10 @@ int kernel_read(struct file *file, unsigned long offset, char *addr, unsigned lo
 
 int prepare_binprm(struct linux_binprm *bprm)
 {
-    int mode;
-    struct inode *inode = bprm->file->f_inode;
+    //int mode;
+    //struct inode *inode = bprm->file->f_inode;
 
-    mode = inode->i_mode;
+    //mode = inode->i_mode;
     /* Huh? We had already checked for MAY_EXEC, WTF do we check this? */
     //if (!(mode & 0111)) /* with at least _one_ execute bit set */
         //return -EACCES;
@@ -107,9 +108,9 @@ struct file *open_exec(char *name)
     struct file *file = NULL;
     struct inode *file_inode = NULL;
 
-    file = (struct file *)kmalloc(sizeof (struct file));
+    file = (struct file *)kmalloc(sizeof (struct file), GFP_KERNEL);
     if (!file)
-        return -ENOMEM;
+        return NULL;
 
     file->f_count = 1;
     ret = open_namei(name, O_RDONLY, 0, &file_inode, NULL);

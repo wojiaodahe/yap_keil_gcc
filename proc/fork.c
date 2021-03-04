@@ -11,6 +11,7 @@
 #include "slab.h"
 #include "mm.h"
 #include "fs.h"
+#include "pcb.h"
 #include "proc.h"
 
 /* SLAB cache for signal_struct structures (tsk->sig) */
@@ -216,7 +217,7 @@ fail_nomem:
 
 static int copy_files(struct task_struct *tsk)
 {
-
+    return 0;
 }
 
 static int copy_mm(unsigned long clone_flags, struct task_struct *tsk)
@@ -459,6 +460,9 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start, struct pt_regs
 
     //p->parent_exec_id = p->self_exec_id;
 
+    if (copy_files(p) < 0)
+        goto bad_fork_copy_files;
+
 #if 0
     /* ok, now we should be set up.. */
     p->swappable = 1;
@@ -515,7 +519,7 @@ fork_out:
         down(&sem);
 #endif
     return retval;
-
+bad_fork_copy_files:
 bad_fork_cleanup_sighand:
 #if SIGNAL
     exit_sighand(p);

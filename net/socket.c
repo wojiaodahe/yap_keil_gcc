@@ -8,6 +8,7 @@
 #include "printk.h"
 #include "lib.h"
 #include "kmalloc.h"
+#include "netdevice.h"
 
 extern int inet_family_init(void);
 extern struct file *get_empty_filp(void);

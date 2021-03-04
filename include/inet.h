@@ -1,6 +1,8 @@
 #ifndef __INET_H__
 #define __INET_H__
 
+#include "ip.h"
+
 struct inet_pseudo_hdr
 {
 	int sip;

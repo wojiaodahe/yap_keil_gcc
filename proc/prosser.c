@@ -1,4 +1,5 @@
 #include "prosser.h"
+#include "lib.h"
 
 #define ll_alloc_task_struct() ((struct task_struct *)__get_free_pages(GFP_KERNEL, 1))
 #define ll_free_task_struct(p) free_pages((unsigned long)(p), 1)

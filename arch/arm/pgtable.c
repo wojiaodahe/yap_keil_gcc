@@ -4,10 +4,6 @@
 
 unsigned long pmd_page(pmd_t pmd)
 {
-	unsigned long val;
-
-	val = pmd.pmd;
-
 	return __phys_to_virt(pmd_val(pmd) &~0xfff & ~_PAGE_TABLE);
 }
 
